@@ -22,9 +22,9 @@
       -moz-user-select: none;
       -ms-user-select: none;
     }
-    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: #151312; }
-    ::-webkit-scrollbar-thumb { background: #c2542a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: #c2542a; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -73,167 +73,89 @@
         if (!tg) return;
         tg.expand();
         tg.BackButton.show();
-        tg.BackButton.onClick(() => {
-          tg.close();
-        });
+        tg.BackButton.onClick(() => { tg.close(); });
         tg.setHeaderColor('#151312');
         tg.setBackgroundColor('#151312');
         tg.ready();
-        return () => {
-          tg.BackButton.hide();
-        };
+        return () => { tg.BackButton.hide(); };
       }, []);
     }
 
     // =============================================================
     // ИКОНКИ
     // =============================================================
-    const Flame = () => <span style={{ fontSize: 16 }}>🔥</span>;
-    const Plus = () => <span style={{ fontSize: 15, fontWeight: 700 }}>+</span>;
-    const Trash2 = () => <span style={{ fontSize: 13 }}>✕</span>;
-    const Droplet = () => <span style={{ fontSize: 12 }}>💧</span>;
+    const Flame = () => <span style={{ fontSize: 14 }}>🔥</span>;
+    const Plus = () => <span style={{ fontSize: 13, fontWeight: 700 }}>+</span>;
+    const Trash2 = () => <span style={{ fontSize: 12 }}>✕</span>;
+    const Droplet = () => <span style={{ fontSize: 11 }}>💧</span>;
 
     // =============================================================
     // ДАННЫЕ
     // =============================================================
     const ACTIVITY = [
-      { key: "sedentary", label: "Минимум движения", mult: 1.2, hint: "сидячая работа, почти нет спорта" },
-      { key: "light", label: "Лёгкая активность", mult: 1.375, hint: "тренировки 1–3 раза в неделю" },
-      { key: "moderate", label: "Средняя активность", mult: 1.55, hint: "тренировки 3–5 раз в неделю" },
-      { key: "high", label: "Высокая активность", mult: 1.725, hint: "тренировки 6–7 раз в неделю" },
-      { key: "extreme", label: "Физическая работа + спорт", mult: 1.9, hint: "тяжёлый физический труд и тренировки" },
+      { key: "sedentary", label: "Минимум движения", mult: 1.2, hint: "сидячая работа" },
+      { key: "light", label: "Лёгкая активность", mult: 1.375, hint: "1–3 раза" },
+      { key: "moderate", label: "Средняя активность", mult: 1.55, hint: "3–5 раз" },
+      { key: "high", label: "Высокая активность", mult: 1.725, hint: "6–7 раз" },
+      { key: "extreme", label: "Физ. работа + спорт", mult: 1.9, hint: "тяжёлый труд" },
     ];
 
     const GOALS = [
       { key: "dry", label: "Сушка", delta: -0.25 },
       { key: "lose", label: "Снижение веса", delta: -0.2 },
-      { key: "maintain", label: "Удержание веса", delta: 0 },
+      { key: "maintain", label: "Удержание", delta: 0 },
       { key: "gain", label: "Набор массы", delta: 0.12 },
     ];
 
     const RECOMMENDATIONS = {
       dry: {
-        title: "Рекомендовано на сушке",
-        note: "Упор на белок, минимум быстрых углеводов и соусов, углеводы — в первой половине дня.",
-        items: ["Куриная грудка", "Яичный белок", "Творог 0%", "Тунец консервированный", "Креветки", "Гречка варёная", "Брокколи", "Шпинат", "Огурец", "Протеин изолят (порошок)"],
+        title: "На сушке",
+        note: "Упор на белок, минимум углеводов.",
+        items: ["Куриная грудка", "Яичный белок", "Творог 0%", "Тунец", "Креветки", "Брокколи", "Шпинат"],
       },
       lose: {
-        title: "Рекомендовано для снижения веса",
-        note: "Баланс белка и клетчатки, порции круп и жиров — умеренные.",
-        items: ["Куриная грудка", "Творог 5%", "Рис белый варёный", "Овсянка на воде", "Брокколи", "Помидор", "Яблоко", "Греческий йогурт 2%", "Оливковое масло"],
+        title: "Для снижения веса",
+        note: "Баланс белка и клетчатки.",
+        items: ["Куриная грудка", "Творог 5%", "Рис варёный", "Овсянка", "Брокколи", "Помидор", "Яблоко"],
       },
       maintain: {
-        title: "Рекомендовано для удержания веса",
-        note: "Разнообразный рацион без строгих ограничений, следим за общей калорийностью.",
-        items: ["Куриное бедро", "Лосось", "Яйцо целое", "Гречка варёная", "Картофель варёный", "Овощи разные", "Банан", "Миндаль", "Сыр твёрдый"],
+        title: "Для удержания веса",
+        note: "Разнообразный рацион.",
+        items: ["Куриное бедро", "Лосось", "Яйцо", "Гречка", "Картофель", "Банан", "Миндаль"],
       },
       gain: {
-        title: "Рекомендовано для набора массы",
-        note: "Больше плотных калорий: крупы, орехи, полезные жиры, регулярный профицит.",
-        items: ["Говядина постная", "Лосось", "Яйцо целое", "Рис белый варёный", "Овсянка сухая", "Картофель варёный", "Арахисовая паста", "Авокадо", "Гейнер (порошок)", "Банан"],
+        title: "Для набора массы",
+        note: "Больше калорий, крупы, орехи.",
+        items: ["Говядина", "Лосось", "Яйцо", "Рис", "Овсянка", "Арахисовая паста", "Банан"],
       },
     };
 
     const WATER_QUICK = [
       { label: "Стакан", ml: 250 },
-      { label: "Бутылка 0.5 л", ml: 500 },
-      { label: "Бутылка 1 л", ml: 1000 },
-      { label: "Бутылка 1.5 л", ml: 1500 },
-      { label: "Бутылка 2 л", ml: 2000 },
+      { label: "0.5 л", ml: 500 },
+      { label: "1 л", ml: 1000 },
+      { label: "1.5 л", ml: 1500 },
     ];
 
     const FOOD_DB = [
       { name: "Куриная грудка", kcal: 165, protein: 31, fat: 3.6, carbs: 0 },
       { name: "Куриное бедро", kcal: 209, protein: 18, fat: 15, carbs: 0 },
       { name: "Говядина постная", kcal: 187, protein: 26, fat: 9, carbs: 0 },
-      { name: "Свинина", kcal: 242, protein: 21, fat: 18, carbs: 0 },
       { name: "Лосось", kcal: 208, protein: 20, fat: 13, carbs: 0 },
-      { name: "Тунец консервированный", kcal: 116, protein: 26, fat: 1, carbs: 0 },
-      { name: "Креветки", kcal: 99, protein: 24, fat: 0.3, carbs: 0.2 },
-      { name: "Яйцо целое", kcal: 155, protein: 13, fat: 11, carbs: 1.1 },
-      { name: "Яичный белок", kcal: 52, protein: 11, fat: 0.2, carbs: 0.7 },
       { name: "Творог 5%", kcal: 121, protein: 18, fat: 5, carbs: 3 },
       { name: "Творог 0%", kcal: 71, protein: 16, fat: 0.6, carbs: 1.8 },
-      { name: "Греческий йогурт 2%", kcal: 73, protein: 9, fat: 2, carbs: 4 },
-      { name: "Молоко 2.5%", kcal: 52, protein: 2.8, fat: 2.5, carbs: 4.7 },
-      { name: "Кефир 1%", kcal: 40, protein: 3, fat: 1, carbs: 4 },
-      { name: "Сыр твёрдый", kcal: 363, protein: 24, fat: 29, carbs: 0 },
-      { name: "Тофу", kcal: 76, protein: 8, fat: 4.8, carbs: 1.9 },
-      { name: "Гречка сырая", kcal: 343, protein: 12.6, fat: 3.3, carbs: 62 },
+      { name: "Яйцо целое", kcal: 155, protein: 13, fat: 11, carbs: 1.1 },
       { name: "Гречка варёная", kcal: 92, protein: 3.4, fat: 0.9, carbs: 17.1 },
-      { name: "Рис белый сырой", kcal: 344, protein: 6.7, fat: 0.6, carbs: 78 },
       { name: "Рис белый варёный", kcal: 130, protein: 2.7, fat: 0.3, carbs: 28 },
-      { name: "Овсянка сухая", kcal: 389, protein: 16.9, fat: 6.9, carbs: 66 },
       { name: "Овсянка на воде", kcal: 88, protein: 3, fat: 1.7, carbs: 15 },
-      { name: "Макароны варёные", kcal: 131, protein: 5, fat: 1.1, carbs: 25 },
-      { name: "Киноа варёная", kcal: 120, protein: 4.4, fat: 1.9, carbs: 21 },
-      { name: "Чечевица варёная", kcal: 116, protein: 9, fat: 0.4, carbs: 20 },
-      { name: "Нут варёный", kcal: 164, protein: 9, fat: 2.6, carbs: 27 },
-      { name: "Картофель варёный", kcal: 82, protein: 2, fat: 0.1, carbs: 17 },
-      { name: "Батат печёный", kcal: 90, protein: 2, fat: 0.1, carbs: 21 },
-      { name: "Хлеб белый", kcal: 265, protein: 9, fat: 3.2, carbs: 49 },
-      { name: "Хлеб ржаной/цельнозерновой", kcal: 259, protein: 8.5, fat: 3.3, carbs: 45 },
       { name: "Брокколи", kcal: 34, protein: 2.8, fat: 0.4, carbs: 7 },
-      { name: "Огурец", kcal: 15, protein: 0.7, fat: 0.1, carbs: 3.6 },
       { name: "Помидор", kcal: 18, protein: 0.9, fat: 0.2, carbs: 3.9 },
-      { name: "Перец болгарский", kcal: 26, protein: 1, fat: 0.3, carbs: 6 },
-      { name: "Шпинат", kcal: 23, protein: 2.9, fat: 0.4, carbs: 3.6 },
-      { name: "Морковь", kcal: 41, protein: 0.9, fat: 0.2, carbs: 10 },
-      { name: "Капуста белокочанная", kcal: 25, protein: 1.3, fat: 0.1, carbs: 6 },
-      { name: "Авокадо", kcal: 160, protein: 2, fat: 15, carbs: 9 },
-      { name: "Банан", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23 },
       { name: "Яблоко", kcal: 52, protein: 0.3, fat: 0.2, carbs: 14 },
-      { name: "Апельсин", kcal: 47, protein: 0.9, fat: 0.1, carbs: 12 },
-      { name: "Клубника", kcal: 32, protein: 0.7, fat: 0.3, carbs: 8 },
-      { name: "Виноград", kcal: 69, protein: 0.7, fat: 0.2, carbs: 18 },
+      { name: "Банан", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23 },
       { name: "Миндаль", kcal: 579, protein: 21, fat: 50, carbs: 22 },
-      { name: "Грецкий орех", kcal: 654, protein: 15, fat: 65, carbs: 14 },
-      { name: "Арахисовая паста", kcal: 588, protein: 25, fat: 50, carbs: 20 },
       { name: "Оливковое масло", kcal: 884, protein: 0, fat: 100, carbs: 0 },
-      { name: "Сливочное масло", kcal: 717, protein: 0.9, fat: 81, carbs: 0.1 },
-      { name: "Мёд", kcal: 304, protein: 0.3, fat: 0, carbs: 82 },
-      { name: "Сахар", kcal: 387, protein: 0, fat: 0, carbs: 100 },
-      { name: "Чизбургер", kcal: 250, protein: 13, fat: 12, carbs: 23, typicalGrams: 120 },
-      { name: "Гамбургер", kcal: 235, protein: 12, fat: 9, carbs: 28, typicalGrams: 110 },
-      { name: "Чикенбургер", kcal: 280, protein: 14, fat: 14, carbs: 26, typicalGrams: 160 },
-      { name: "Двойной чизбургер", kcal: 270, protein: 16, fat: 15, carbs: 20, typicalGrams: 170 },
-      { name: "Картофель фри", kcal: 312, protein: 3.4, fat: 15, carbs: 41, typicalGrams: 100 },
-      { name: "Наггетсы куриные", kcal: 296, protein: 15, fat: 18, carbs: 17, typicalGrams: 100 },
-      { name: "Хот-дог", kcal: 290, protein: 10, fat: 18, carbs: 22, typicalGrams: 150 },
-      { name: "Шаурма", kcal: 220, protein: 11, fat: 10, carbs: 20, typicalGrams: 300 },
-      { name: "Донер кебаб", kcal: 210, protein: 12, fat: 9, carbs: 20, typicalGrams: 300 },
-      { name: "Пицца Маргарита (кусок)", kcal: 266, protein: 11, fat: 10, carbs: 33, typicalGrams: 100 },
-      { name: "Пицца Пепперони (кусок)", kcal: 298, protein: 13, fat: 15, carbs: 30, typicalGrams: 100 },
-      { name: "Ролл Филадельфия", kcal: 176, protein: 6, fat: 8, carbs: 20, typicalGrams: 200 },
-      { name: "Ролл Калифорния", kcal: 150, protein: 5, fat: 5, carbs: 20, typicalGrams: 200 },
-      { name: "Кола", kcal: 42, protein: 0, fat: 0, carbs: 10.6, typicalGrams: 330 },
-      { name: "Сок апельсиновый", kcal: 45, protein: 0.7, fat: 0.2, carbs: 10, typicalGrams: 200 },
-      { name: "Пиво светлое", kcal: 43, protein: 0.5, fat: 0, carbs: 3.6, typicalGrams: 500 },
-      { name: "Кофе с молоком", kcal: 40, protein: 2, fat: 1.5, carbs: 4, typicalGrams: 250 },
-      { name: "Латте", kcal: 45, protein: 3, fat: 1.6, carbs: 4.5, typicalGrams: 300 },
-      { name: "Шоколад молочный", kcal: 534, protein: 7.7, fat: 30, carbs: 58, typicalGrams: 50 },
-      { name: "Шоколад тёмный 70%", kcal: 546, protein: 7.8, fat: 31, carbs: 46, typicalGrams: 50 },
-      { name: "Чипсы картофельные", kcal: 536, protein: 6.6, fat: 34, carbs: 53, typicalGrams: 50 },
-      { name: "Печенье овсяное", kcal: 437, protein: 6, fat: 18, carbs: 64, typicalGrams: 50 },
-      { name: "Мороженое пломбир", kcal: 227, protein: 3.5, fat: 15, carbs: 20, typicalGrams: 100 },
-      { name: "Попкорн", kcal: 375, protein: 9, fat: 15, carbs: 58, typicalGrams: 50 },
-      { name: "Майонез", kcal: 680, protein: 1, fat: 75, carbs: 2.6, typicalGrams: 20 },
-      { name: "Кетчуп", kcal: 112, protein: 1.2, fat: 0.2, carbs: 27, typicalGrams: 20 },
-      { name: "Соевый соус", kcal: 53, protein: 8, fat: 0, carbs: 5, typicalGrams: 15 },
-      { name: "Борщ", kcal: 49, protein: 2, fat: 2, carbs: 6, typicalGrams: 300 },
-      { name: "Оливье", kcal: 190, protein: 5, fat: 15, carbs: 8, typicalGrams: 150 },
-      { name: "Пельмени варёные", kcal: 220, protein: 11, fat: 9, carbs: 24, typicalGrams: 200 },
-      { name: "Плов", kcal: 200, protein: 8, fat: 8, carbs: 25, typicalGrams: 250 },
-      { name: "Паста Болоньезе", kcal: 151, protein: 8, fat: 5, carbs: 18, typicalGrams: 300 },
-      { name: "Цезарь с курицей", kcal: 175, protein: 12, fat: 11, carbs: 6, typicalGrams: 250 },
-      { name: "Греческий салат", kcal: 105, protein: 3, fat: 8, carbs: 5, typicalGrams: 200 },
-      { name: "Протеин сывороточный (порошок)", kcal: 380, protein: 75, fat: 5, carbs: 8, typicalGrams: 30 },
-      { name: "Протеин изолят (порошок)", kcal: 370, protein: 85, fat: 1.5, carbs: 3, typicalGrams: 30 },
-      { name: "Казеин (порошок)", kcal: 360, protein: 75, fat: 2, carbs: 6, typicalGrams: 30 },
-      { name: "Протеиновый батончик", kcal: 380, protein: 30, fat: 12, carbs: 35, typicalGrams: 50 },
-      { name: "Гейнер (порошок)", kcal: 380, protein: 20, fat: 3, carbs: 70, typicalGrams: 100 },
-      { name: "BCAA (порошок)", kcal: 6, protein: 1.5, fat: 0, carbs: 0, typicalGrams: 10 },
-      { name: "Креатин моногидрат", kcal: 0, protein: 0, fat: 0, carbs: 0, typicalGrams: 5 },
+      { name: "Шоколад молочный", kcal: 534, protein: 7.7, fat: 30, carbs: 58 },
+      { name: "Протеин (порошок)", kcal: 380, protein: 75, fat: 5, carbs: 8 },
     ];
 
     const uid = () => Math.random().toString(36).slice(2, 10);
@@ -317,11 +239,7 @@
         if (!val || val < 20 || val > 300) return;
         const now = new Date();
         const dateStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
-        const entry = {
-          id: uid(),
-          date: dateStr,
-          weight: val,
-        };
+        const entry = { id: uid(), date: dateStr, weight: val };
         const next = [...weightRecords, entry];
         setWeightRecords(next);
         persistWeight(next);
@@ -457,181 +375,179 @@
         app: {
           background: "#151312",
           color: "#e9e2d6",
-          padding: 14,
+          padding: 10,
           borderRadius: 12,
           border: "1px solid #322d29",
-          maxWidth: 640,
+          maxWidth: "100%",
           width: "100%",
           margin: "0 auto",
           boxSizing: "border-box",
           overflowX: "hidden",
         },
-        header: { display: "flex", alignItems: "center", gap: 9, marginBottom: 16 },
-        brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 0.5 },
+        header: { display: "flex", alignItems: "center", gap: 9, marginBottom: 12 },
+        brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 14, letterSpacing: 0.5 },
         sub: { fontSize: 11, color: "#9a9188" },
-        grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+        grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
         card: {
           background: "#1c1a18",
           border: "1px solid #322d29",
           borderRadius: 10,
-          padding: 16,
+          padding: 12,
           width: "100%",
           boxSizing: "border-box",
           overflow: "hidden",
         },
-        rowLabel: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "10px 0 6px" },
-        segRow: { display: "flex", gap: 6 },
+        rowLabel: { fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "8px 0 4px" },
+        segRow: { display: "flex", gap: 4 },
         seg: {
           flex: 1,
           background: "#211e1b",
           border: "1px solid transparent",
           color: "#9a9188",
-          borderRadius: 7,
-          padding: "7px 8px",
-          fontSize: 11.5,
+          borderRadius: 6,
+          padding: "6px 4px",
+          fontSize: 11,
           cursor: "pointer",
           textAlign: "center",
-          minWidth: "60px",
+          minWidth: "50px",
         },
         segActive: { background: "#c2542a", color: "#1c1a18", fontWeight: 700 },
-        fieldsRow: { display: "flex", gap: 8, margin: "12px 0 2px" },
-        field: { flex: 1, display: "flex", flexDirection: "column", gap: 4 },
-        fieldLabel: { fontSize: 10.5, color: "#9a9188" },
+        fieldsRow: { display: "flex", gap: 6, margin: "8px 0 2px" },
+        field: { flex: 1, display: "flex", flexDirection: "column", gap: 3 },
+        fieldLabel: { fontSize: 9.5, color: "#9a9188" },
         fieldInputWrap: {
           display: "flex",
           alignItems: "center",
           background: "#211e1b",
           border: "1px solid #322d29",
-          borderRadius: 7,
-          padding: "6px 10px",
+          borderRadius: 6,
+          padding: "4px 8px",
         },
         fieldInput: {
           background: "transparent",
           border: "none",
           color: "#3fb7a6",
           width: "100%",
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 600,
-          minWidth: "40px",
+          minWidth: "35px",
         },
-        fieldUnit: { fontSize: 10, color: "#9a9188" },
-        optRow: { display: "flex", alignItems: "center", gap: 8, background: "#211e1b", border: "1px solid transparent", borderRadius: 7, padding: "7px 9px", cursor: "pointer" },
+        fieldUnit: { fontSize: 9, color: "#9a9188" },
+        optRow: { display: "flex", alignItems: "center", gap: 6, background: "#211e1b", border: "1px solid transparent", borderRadius: 6, padding: "5px 8px", cursor: "pointer" },
         optRowActive: { borderColor: "#c2542a", background: "#241d18" },
-        optDot: (active) => ({ width: 8, height: 8, borderRadius: "50%", background: active ? "#c2542a" : "#322d29" }),
-        optLabel: { fontSize: 12, fontWeight: 600 },
-        optHint: { fontSize: 10, color: "#9a9188" },
-        ringsRow: { display: "flex", justifyContent: "center", gap: 10, padding: "4px 0 10px" },
-        ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 24, fontWeight: 700, fill: "#e9e2d6" },
-        ringUnit: { fontSize: 8.5, fill: "#9a9188" },
-        ringCaption: { fontSize: 10, fontWeight: 700 },
-        statRow: { display: "flex", gap: 8, marginBottom: 14 },
-        statBox: { flex: 1, background: "#211e1b", border: "1px solid #322d29", borderRadius: 8, padding: "8px 10px", textAlign: "center" },
-        statValue: { fontFamily: "'Oswald', sans-serif", fontSize: 16, fontWeight: 700, color: "#3fb7a6" },
-        statLabel: { fontSize: 9.5, color: "#9a9188" },
-        macroTitle: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", marginBottom: 6 },
-        macroRow: { display: "flex", gap: 8 },
-        macroBox: { flex: 1, display: "flex", flexDirection: "column", gap: 4 },
-        macroBarTrack: { height: 5, borderRadius: 3, background: "#211e1b", overflow: "hidden" },
-        macroBarFill: { height: "100%", borderRadius: 3, transition: "width 0.4s ease" },
-        macroValue: { fontSize: 12.5, fontWeight: 700 },
-        macroLabel: { fontSize: 10, color: "#9a9188" },
+        optDot: (active) => ({ width: 7, height: 7, borderRadius: "50%", background: active ? "#c2542a" : "#322d29" }),
+        optLabel: { fontSize: 11, fontWeight: 600 },
+        optHint: { fontSize: 9, color: "#9a9188" },
+        ringsRow: { display: "flex", justifyContent: "center", gap: 8, padding: "2px 0 6px" },
+        ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 2 },
+        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 20, fontWeight: 700, fill: "#e9e2d6" },
+        ringUnit: { fontSize: 8, fill: "#9a9188" },
+        ringCaption: { fontSize: 9, fontWeight: 700 },
+        statRow: { display: "flex", gap: 6, marginBottom: 10 },
+        statBox: { flex: 1, background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, padding: "6px 8px", textAlign: "center" },
+        statValue: { fontFamily: "'Oswald', sans-serif", fontSize: 14, fontWeight: 700, color: "#3fb7a6" },
+        statLabel: { fontSize: 9, color: "#9a9188" },
+        macroTitle: { fontSize: 9.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", marginBottom: 4 },
+        macroRow: { display: "flex", gap: 6 },
+        macroBox: { flex: 1, display: "flex", flexDirection: "column", gap: 3 },
+        macroBarTrack: { height: 4, borderRadius: 2, background: "#211e1b", overflow: "hidden" },
+        macroBarFill: { height: "100%", borderRadius: 2, transition: "width 0.4s ease" },
+        macroValue: { fontSize: 11, fontWeight: 700 },
+        macroLabel: { fontSize: 9, color: "#9a9188" },
         foodNameInput: {
           width: "100%",
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
-          borderRadius: 7,
-          padding: "8px 10px",
-          fontSize: 12.5,
-          marginBottom: 6,
+          borderRadius: 6,
+          padding: "6px 8px",
+          fontSize: 11.5,
+          marginBottom: 4,
           boxSizing: "border-box",
         },
-        foodKcalInput: { width: 80, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 7, padding: "8px 10px", fontSize: 12.5, textAlign: "center" },
-        addFoodBtn: { width: 36, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 7, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
-        macroInputRow: { display: "flex", gap: 6, marginBottom: 10, alignItems: "flex-end", flexWrap: "wrap" },
-        miniField: { flex: 1, minWidth: 52, display: "flex", flexDirection: "column", gap: 3 },
-        miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "7px 6px", fontSize: 12.5, textAlign: "center", fontWeight: 600, width: "100%" },
-        miniFieldLabel: { fontSize: 8.5, color: "#9a9188", textAlign: "center" },
-        foodList: { display: "flex", flexDirection: "column", gap: 5 },
+        foodKcalInput: { width: 70, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 6, padding: "6px 8px", fontSize: 11.5, textAlign: "center" },
+        addFoodBtn: { width: 32, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 6, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
+        macroInputRow: { display: "flex", gap: 4, marginBottom: 6, alignItems: "flex-end", flexWrap: "wrap" },
+        miniField: { flex: 1, minWidth: 45, display: "flex", flexDirection: "column", gap: 2 },
+        miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, padding: "5px 4px", fontSize: 11, textAlign: "center", fontWeight: 600, width: "100%" },
+        miniFieldLabel: { fontSize: 8, color: "#9a9188", textAlign: "center" },
+        foodList: { display: "flex", flexDirection: "column", gap: 4 },
         foodRow: {
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 6,
           background: "#211e1b",
           border: "1px solid #322d29",
-          borderRadius: 7,
-          padding: "6px 10px",
-          fontSize: 12,
+          borderRadius: 6,
+          padding: "4px 8px",
+          fontSize: 11,
           width: "100%",
           boxSizing: "border-box",
           overflow: "hidden",
         },
         foodKcalTag: { color: "#3fb7a6", fontWeight: 600, textAlign: "right", flexShrink: 0 },
-        macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 10 },
+        macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 9 },
         ghostDelete: { background: "transparent", border: "none", color: "#9a9188", cursor: "pointer" },
-        waterQuickRow: { display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" },
-        waterQuickBtn: { background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 7, padding: "6px 10px", fontSize: 11.5, cursor: "pointer", fontWeight: 600 },
-        footnote: { fontSize: 10, color: "#9a9188", lineHeight: 1.5, marginTop: 10 },
-        foodInputRow: { display: "flex", gap: 6, marginBottom: 10 },
-        dbRow: { display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 4 },
-        dbPreview: { flex: 1, fontSize: 12, paddingBottom: 6 },
-        suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 8, overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.4)" },
-        suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "8px 10px", fontSize: 12, cursor: "pointer", textAlign: "left" },
-        suggestMeta: { fontSize: 10.5, color: "#9a9188" },
-        recoChips: { display: "flex", flexWrap: "wrap", gap: 6, width: "100%" },
+        waterQuickRow: { display: "flex", gap: 4, marginBottom: 6, flexWrap: "wrap" },
+        waterQuickBtn: { background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 6, padding: "4px 8px", fontSize: 10.5, cursor: "pointer", fontWeight: 600 },
+        footnote: { fontSize: 9, color: "#9a9188", lineHeight: 1.4, marginTop: 6 },
+        foodInputRow: { display: "flex", gap: 4, marginBottom: 6 },
+        dbRow: { display: "flex", gap: 6, alignItems: "flex-end", marginBottom: 4 },
+        dbPreview: { flex: 1, fontSize: 11, paddingBottom: 4 },
+        suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.4)" },
+        suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "6px 8px", fontSize: 11, cursor: "pointer", textAlign: "left" },
+        suggestMeta: { fontSize: 9.5, color: "#9a9188" },
+        recoChips: { display: "flex", flexWrap: "wrap", gap: 4, width: "100%" },
         recoChip: {
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
           borderRadius: 999,
-          padding: "6px 12px",
-          fontSize: 11.5,
+          padding: "4px 10px",
+          fontSize: 10.5,
           cursor: "pointer",
           whiteSpace: "nowrap",
           maxWidth: "100%",
           overflow: "hidden",
           textOverflow: "ellipsis",
         },
-        weightInputRow: {
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          marginBottom: 10,
-        },
+        weightInputRow: { display: "flex", gap: 6, alignItems: "center", marginBottom: 8 },
         weightInput: {
           flex: 1,
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
-          borderRadius: 7,
-          padding: "8px 10px",
-          fontSize: 12.5,
+          borderRadius: 6,
+          padding: "6px 8px",
+          fontSize: 11.5,
           boxSizing: "border-box",
           width: "100%",
         },
         weightAddBtn: {
           background: "#c2542a",
           border: "none",
-          borderRadius: 7,
+          borderRadius: 6,
           color: "#1c1a18",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
           whiteSpace: "nowrap",
-          padding: "0 16px",
-          height: "38px",
-          fontSize: 12.5,
+          padding: "0 14px",
+          height: "34px",
+          fontSize: 11.5,
           fontWeight: 600,
         },
       };
 
+      // =============================================================
+      // ВЕРСТКА
+      // =============================================================
       return (
         <div style={styles.app}>
           {/* Шапка */}
           <div style={styles.header}>
-            <div style={{ width: 30, height: 30, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 28, height: 28, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
             </div>
             <div>
@@ -642,7 +558,6 @@
 
           {/* Основная сетка */}
           <div style={styles.grid}>
-            {/* Левая колонка */}
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
@@ -675,7 +590,7 @@
               </div>
 
               <div style={styles.rowLabel}>Активность</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {ACTIVITY.map(a => (
                   <button key={a.key} onClick={() => setActivity(a.key)} style={{ ...styles.optRow, ...(activity === a.key ? styles.optRowActive : {}) }}>
                     <span style={styles.optDot(activity === a.key)} />
@@ -697,30 +612,29 @@
               </div>
             </div>
 
-            {/* Правая колонка */}
             <div style={styles.card}>
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
-                  <svg viewBox="0 0 140 140" style={{ width: 128, height: 128 }}>
+                  <svg viewBox="0 0 140 140" style={{ width: 110, height: 110 }}>
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
                     <circle cx="70" cy="70" r="58" fill="none" stroke={over ? "#d9503f" : "#c2542a"} strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - ringPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
                     <text x="70" y="66" textAnchor="middle" style={styles.ringNumber}>{Math.round(eaten)}</text>
-                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>ккал съедено</text>
+                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>ккал</text>
                   </svg>
                   <div style={{ ...styles.ringCaption, color: over ? "#d9503f" : "#c2542a" }}>
-                    {over ? `перебор на ${Math.abs(remaining)}` : `осталось ${remaining} ккал`}
+                    {over ? `+${Math.abs(remaining)}` : `${remaining} ккал`}
                   </div>
                 </div>
 
                 <div style={styles.ringCol}>
-                  <svg viewBox="0 0 140 140" style={{ width: 128, height: 128 }}>
+                  <svg viewBox="0 0 140 140" style={{ width: 110, height: 110 }}>
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#3fb7a6" strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - waterPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
                     <text x="70" y="66" textAnchor="middle" style={{ ...styles.ringNumber, fill: "#3fb7a6" }}>{(drunk / 1000).toFixed(1)}л</text>
-                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>воды выпито</text>
+                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>вода</text>
                   </svg>
                   <div style={{ ...styles.ringCaption, color: "#3fb7a6" }}>
-                    {waterDone ? "норма выполнена 💧" : `осталось ${waterRemaining} мл`}
+                    {waterDone ? "✅" : `${waterRemaining} мл`}
                   </div>
                 </div>
               </div>
@@ -736,33 +650,31 @@
                 </div>
               </div>
 
-              <div style={styles.macroTitle}>БЖУ — съедено / норма на день</div>
+              <div style={styles.macroTitle}>БЖУ</div>
               <div style={styles.macroRow}>
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenProtein / result.protein) * 100)}%`, background: "#3fb7a6" }} /></div>
-                  <div style={styles.macroValue}>{Math.round(eatenProtein)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.protein)} г</span></div>
+                  <div style={styles.macroValue}>{Math.round(eatenProtein)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.protein)}</span></div>
                   <div style={styles.macroLabel}>Белки</div>
                 </div>
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenFat / result.fat) * 100)}%`, background: "#c2542a" }} /></div>
-                  <div style={styles.macroValue}>{Math.round(eatenFat)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.fat)} г</span></div>
+                  <div style={styles.macroValue}>{Math.round(eatenFat)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.fat)}</span></div>
                   <div style={styles.macroLabel}>Жиры</div>
                 </div>
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenCarbs / result.carbs) * 100)}%`, background: "#9a9188" }} /></div>
-                  <div style={styles.macroValue}>{Math.round(eatenCarbs)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.carbs)} г</span></div>
+                  <div style={styles.macroValue}>{Math.round(eatenCarbs)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.carbs)}</span></div>
                   <div style={styles.macroLabel}>Углеводы</div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК: РЕКОМЕНДАЦИИ
-          ============================================================= */}
-          <div style={{ ...styles.card, marginTop: 12 }}>
+          {/* Рекомендации */}
+          <div style={{ ...styles.card, marginTop: 10 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
-            <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 10 }}>{RECOMMENDATIONS[goal].note}</p>
+            <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 6 }}>{RECOMMENDATIONS[goal].note}</p>
             <div style={styles.recoChips}>
               {RECOMMENDATIONS[goal].items.map((item) => (
                 <button key={item} style={styles.recoChip} onClick={() => pickFromRecommendation(item)}>
@@ -772,10 +684,8 @@
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ (НОВЫЙ!)
-          ============================================================= */}
-          <div style={{ ...styles.card, marginTop: 12 }}>
+          {/* Методика управления весом */}
+          <div style={{ ...styles.card, marginTop: 10 }}>
             <div style={styles.rowLabel}>Методика управления весом</div>
             <div style={styles.weightInputRow}>
               <input
@@ -786,11 +696,8 @@
                 onChange={(e) => setWeightInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addWeightRecord()}
               />
-              <button style={styles.weightAddBtn} onClick={addWeightRecord}>
-                + Добавить
-              </button>
+              <button style={styles.weightAddBtn} onClick={addWeightRecord}>+ Добавить</button>
             </div>
-
             {!weightLoaded ? (
               <div style={styles.footnote}>Загружаю...</div>
             ) : !weightRecords.length ? (
@@ -801,24 +708,20 @@
                   <div key={record.id} style={styles.foodRow}>
                     <span style={{ flex: 1 }}>📊 {record.date}</span>
                     <span style={styles.foodKcalTag}>{record.weight} кг</span>
-                    <button style={styles.ghostDelete} onClick={() => removeWeightRecord(record.id)}>
-                      <Trash2 />
-                    </button>
+                    <button style={styles.ghostDelete} onClick={() => removeWeightRecord(record.id)}><Trash2 /></button>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* =============================================================
-              БЛОК: ДНЕВНИК ПИТАНИЯ
-          ============================================================= */}
-          <div style={{ ...styles.card, marginTop: 12 }}>
+          {/* Дневник питания */}
+          <div style={{ ...styles.card, marginTop: 10 }}>
             <div style={styles.rowLabel}>Дневник питания — сегодня</div>
             <div style={{ position: "relative" }}>
               <input
                 style={styles.foodNameInput}
-                placeholder="начни вводить продукт (например, куриная)"
+                placeholder="начни вводить продукт"
                 value={foodName}
                 onChange={e => {
                   setFoodName(e.target.value);
@@ -843,9 +746,7 @@
                       }}
                     >
                       <span>{f.name}</span>
-                      <span style={styles.suggestMeta}>
-                        {f.kcal} ккал/100г{f.typicalGrams ? ` · порция ~${f.typicalGrams}г` : ""}
-                      </span>
+                      <span style={styles.suggestMeta}>{f.kcal} ккал/100г</span>
                     </button>
                   ))}
                 </div>
@@ -855,67 +756,31 @@
             {selectedFood ? (
               <div style={styles.dbRow}>
                 <div style={styles.miniField}>
-                  <input
-                    type="number"
-                    value={grams}
-                    onChange={e => setGrams(e.target.value)}
-                    style={{ ...styles.miniFieldInput, color: "#3fb7a6" }}
-                  />
+                  <input type="number" value={grams} onChange={e => setGrams(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
                   <span style={styles.miniFieldLabel}>граммы</span>
                 </div>
                 <div style={styles.dbPreview}>
-                  {computedFromDb && (
-                    <span style={{ color: "#c2542a", fontWeight: 700 }}>
-                      {computedFromDb.kcal} ккал
-                      <span style={{ color: "#9a9188", fontWeight: 400 }}>
-                        {" "}Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}
-                      </span>
-                    </span>
-                  )}
+                  {computedFromDb && <span style={{ color: "#c2542a", fontWeight: 700 }}>{computedFromDb.kcal} ккал <span style={{ color: "#9a9188", fontWeight: 400 }}>Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}</span></span>}
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
             ) : (
               <div style={styles.macroInputRow}>
                 <div style={styles.miniField}>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={foodKcal}
-                    onChange={e => setFoodKcal(e.target.value)}
-                    style={{ ...styles.miniFieldInput, color: "#c2542a" }}
-                  />
+                  <input type="number" placeholder="0" value={foodKcal} onChange={e => setFoodKcal(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
                   <span style={styles.miniFieldLabel}>ккал</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={foodProtein}
-                    onChange={e => setFoodProtein(e.target.value)}
-                    style={{ ...styles.miniFieldInput, color: "#3fb7a6" }}
-                  />
-                  <span style={styles.miniFieldLabel}>белки г</span>
+                  <input type="number" placeholder="0" value={foodProtein} onChange={e => setFoodProtein(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
+                  <span style={styles.miniFieldLabel}>белки</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={foodFat}
-                    onChange={e => setFoodFat(e.target.value)}
-                    style={{ ...styles.miniFieldInput, color: "#c2542a" }}
-                  />
-                  <span style={styles.miniFieldLabel}>жиры г</span>
+                  <input type="number" placeholder="0" value={foodFat} onChange={e => setFoodFat(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
+                  <span style={styles.miniFieldLabel}>жиры</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={foodCarbs}
-                    onChange={e => setFoodCarbs(e.target.value)}
-                    style={{ ...styles.miniFieldInput, color: "#9a9188" }}
-                  />
-                  <span style={styles.miniFieldLabel}>углев г</span>
+                  <input type="number" placeholder="0" value={foodCarbs} onChange={e => setFoodCarbs(e.target.value)} style={{ ...styles.miniFieldInput, color: "#9a9188" }} />
+                  <span style={styles.miniFieldLabel}>углеводы</span>
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
@@ -924,20 +789,13 @@
             {!logLoaded ? (
               <div style={styles.footnote}>Загружаю...</div>
             ) : !log.length ? (
-              <div style={styles.footnote}>Пока пусто — добавь первый приём пищи выше.</div>
+              <div style={styles.footnote}>Пока пусто</div>
             ) : (
               <div style={styles.foodList}>
                 {log.map(f => (
                   <div key={f.id} style={styles.foodRow}>
                     <span style={{ flex: 1 }}>{f.name}</span>
-                    <span style={styles.foodKcalTag}>
-                      {f.kcal} ккал
-                      {(f.protein || f.fat || f.carbs) && (
-                        <span style={styles.macroTag}>
-                          {" "}Б{f.protein || 0}/Ж{f.fat || 0}/У{f.carbs || 0}
-                        </span>
-                      )}
-                    </span>
+                    <span style={styles.foodKcalTag}>{f.kcal} ккал</span>
                     <button style={styles.ghostDelete} onClick={() => removeFood(f.id)}><Trash2 /></button>
                   </div>
                 ))}
@@ -945,34 +803,22 @@
             )}
           </div>
 
-          {/* =============================================================
-              БЛОК: ВОДА
-          ============================================================= */}
-          <div style={{ ...styles.card, marginTop: 12 }}>
+          {/* Вода */}
+          <div style={{ ...styles.card, marginTop: 10 }}>
             <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
             <div style={styles.waterQuickRow}>
               {WATER_QUICK.map(q => (
-                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>
-                  + {q.label} ({q.ml} мл)
-                </button>
+                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>+ {q.label}</button>
               ))}
             </div>
             <div style={styles.foodInputRow}>
-              <input
-                style={styles.foodKcalInput}
-                placeholder="мл"
-                type="number"
-                value={customMl}
-                onChange={e => setCustomMl(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addCustomWater()}
-              />
+              <input style={styles.foodKcalInput} placeholder="мл" type="number" value={customMl} onChange={e => setCustomMl(e.target.value)} onKeyDown={e => e.key === "Enter" && addCustomWater()} />
               <button style={styles.addFoodBtn} onClick={addCustomWater}><Plus /></button>
             </div>
-
             {!waterLoaded ? (
               <div style={styles.footnote}>Загружаю…</div>
             ) : !water.length ? (
-              <div style={styles.footnote}>Пока пусто — отметь первый стакан воды.</div>
+              <div style={styles.footnote}>Пока пусто</div>
             ) : (
               <div style={styles.foodList}>
                 {water.map(w => (
@@ -984,11 +830,6 @@
                 ))}
               </div>
             )}
-
-            <p style={styles.footnote}>
-              Дневники видны только тебе и сбрасываются на новый день. Расчёты ориентировочные —
-              для точной корректировки подключи консультацию с тренером.
-            </p>
           </div>
         </div>
       );
