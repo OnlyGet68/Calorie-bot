@@ -4,18 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Логово Жизни</title>
-
-  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- Шрифты -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet" />
-
-  <!-- React -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body, #root {
@@ -39,7 +32,7 @@
 
   <script type="text/babel">
     // =============================================================
-    // ЗАЩИТА ОТ КОПИРОВАНИЯ
+    // ЗАЩИТА
     // =============================================================
     document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
     document.addEventListener('keydown', e => {
@@ -67,7 +60,7 @@
     }
 
     // =============================================================
-    // REACT КОД
+    // REACT
     // =============================================================
     const { useState, useMemo, useEffect, useCallback } = React;
 
@@ -250,6 +243,7 @@
     };
     const foodKeyToday = () => `foodlog:${dateStr()}`;
     const waterKeyToday = () => `waterlog:${dateStr()}`;
+    const weightKey = "weight_log";
 
     // =============================================================
     // ГЛАВНЫЙ КОМПОНЕНТ
@@ -279,6 +273,10 @@
       const [waterLoaded, setWaterLoaded] = useState(false);
       const [customMl, setCustomMl] = useState("");
 
+      const [weightInput, setWeightInput] = useState("");
+      const [weightRecords, setWeightRecords] = useState([]);
+      const [weightLoaded, setWeightLoaded] = useState(false);
+
       const foodKey = foodKeyToday();
       const waterKey = waterKeyToday();
 
@@ -294,6 +292,11 @@
             setWater(r2 ? JSON.parse(r2.value) : []);
           } catch { setWater([]); }
           setWaterLoaded(true);
+          try {
+            const r3 = await window.storage.get(weightKey, false);
+            setWeightRecords(r3 ? JSON.parse(r3.value) : []);
+          } catch { setWeightRecords([]); }
+          setWeightLoaded(true);
         })();
       }, []);
 
@@ -304,6 +307,32 @@
       const persistWater = useCallback(async (next) => {
         try { await window.storage.set(waterKey, JSON.stringify(next), false); } catch {}
       }, [waterKey]);
+
+      const persistWeight = useCallback(async (next) => {
+        try { await window.storage.set(weightKey, JSON.stringify(next), false); } catch {}
+      }, []);
+
+      function addWeightRecord() {
+        const val = Number(weightInput);
+        if (!val || val < 20 || val > 300) return;
+        const now = new Date();
+        const dateStr = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+        const entry = {
+          id: uid(),
+          date: dateStr,
+          weight: val,
+        };
+        const next = [...weightRecords, entry];
+        setWeightRecords(next);
+        persistWeight(next);
+        setWeightInput("");
+      }
+
+      function removeWeightRecord(id) {
+        const next = weightRecords.filter((r) => r.id !== id);
+        setWeightRecords(next);
+        persistWeight(next);
+      }
 
       const suggestions = useMemo(() => {
         const q = foodName.trim().toLowerCase();
@@ -422,7 +451,7 @@
       const waterDone = drunk >= result.waterTarget;
 
       // =============================================================
-      // СТИЛИ (исправленные — ничего не вылезает)
+      // СТИЛИ (исправленные)
       // =============================================================
       const styles = {
         app: {
@@ -445,20 +474,46 @@
           background: "#1c1a18",
           border: "1px solid #322d29",
           borderRadius: 10,
-          padding: 14,
+          padding: 16,
           width: "100%",
           boxSizing: "border-box",
           overflow: "hidden",
         },
         rowLabel: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "10px 0 6px" },
         segRow: { display: "flex", gap: 6 },
-        seg: { flex: 1, background: "#211e1b", border: "1px solid transparent", color: "#9a9188", borderRadius: 7, padding: "7px 6px", fontSize: 11.5, cursor: "pointer" },
+        seg: {
+          flex: 1,
+          background: "#211e1b",
+          border: "1px solid transparent",
+          color: "#9a9188",
+          borderRadius: 7,
+          padding: "7px 8px",
+          fontSize: 11.5,
+          cursor: "pointer",
+          textAlign: "center",
+          minWidth: "60px",
+        },
         segActive: { background: "#c2542a", color: "#1c1a18", fontWeight: 700 },
         fieldsRow: { display: "flex", gap: 8, margin: "12px 0 2px" },
         field: { flex: 1, display: "flex", flexDirection: "column", gap: 4 },
         fieldLabel: { fontSize: 10.5, color: "#9a9188" },
-        fieldInputWrap: { display: "flex", alignItems: "center", background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "6px 8px" },
-        fieldInput: { background: "transparent", border: "none", color: "#3fb7a6", width: "100%", fontSize: 14, fontWeight: 600 },
+        fieldInputWrap: {
+          display: "flex",
+          alignItems: "center",
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          borderRadius: 7,
+          padding: "6px 10px",
+        },
+        fieldInput: {
+          background: "transparent",
+          border: "none",
+          color: "#3fb7a6",
+          width: "100%",
+          fontSize: 14,
+          fontWeight: 600,
+          minWidth: "40px",
+        },
         fieldUnit: { fontSize: 10, color: "#9a9188" },
         optRow: { display: "flex", alignItems: "center", gap: 8, background: "#211e1b", border: "1px solid transparent", borderRadius: 7, padding: "7px 9px", cursor: "pointer" },
         optRowActive: { borderColor: "#c2542a", background: "#241d18" },
@@ -467,7 +522,7 @@
         optHint: { fontSize: 10, color: "#9a9188" },
         ringsRow: { display: "flex", justifyContent: "center", gap: 10, padding: "4px 0 10px" },
         ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
-        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 21, fontWeight: 700, fill: "#e9e2d6" },
+        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 24, fontWeight: 700, fill: "#e9e2d6" },
         ringUnit: { fontSize: 8.5, fill: "#9a9188" },
         ringCaption: { fontSize: 10, fontWeight: 700 },
         statRow: { display: "flex", gap: 8, marginBottom: 14 },
@@ -538,14 +593,50 @@
           overflow: "hidden",
           textOverflow: "ellipsis",
         },
+        weightInputRow: {
+          display: "flex",
+          gap: 8,
+          alignItems: "center",
+          marginBottom: 10,
+        },
+        weightInput: {
+          flex: 1,
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          color: "#e9e2d6",
+          borderRadius: 7,
+          padding: "8px 10px",
+          fontSize: 12.5,
+          boxSizing: "border-box",
+          width: "100%",
+        },
+        weightAddBtn: {
+          width: "auto",
+          padding: "0 16px",
+          flexShrink: 0,
+          background: "#c2542a",
+          border: "none",
+          borderRadius: 7,
+          color: "#1c1a18",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          fontSize: 12,
+          fontWeight: 600,
+          height: 38,
+          whiteSpace: "nowrap",
+        },
+        weightEmpty: {
+          fontSize: 10,
+          color: "#9a9188",
+          lineHeight: 1.5,
+          marginTop: 4,
+        },
       };
 
-      // =============================================================
-      // ВЕРСТКА (порядок: Рекомендации → Дневник → Вода)
-      // =============================================================
       return (
         <div style={styles.app}>
-          {/* Шапка */}
           <div style={styles.header}>
             <div style={{ width: 30, height: 30, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
@@ -556,9 +647,7 @@
             </div>
           </div>
 
-          {/* Основная сетка */}
           <div style={styles.grid}>
-            {/* Левая колонка — настройки */}
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
@@ -613,7 +702,6 @@
               </div>
             </div>
 
-            {/* Правая колонка — кольца */}
             <div style={styles.card}>
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
@@ -673,9 +761,7 @@
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК 1: РЕКОМЕНДАЦИИ
-              ============================================================= */}
+          {/* Рекомендации */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
             <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 10 }}>{RECOMMENDATIONS[goal].note}</p>
@@ -688,9 +774,43 @@
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК 2: ДНЕВНИК ПИТАНИЯ
-              ============================================================= */}
+          {/* Методика управления весом */}
+          <div style={{ ...styles.card, marginTop: 12 }}>
+            <div style={styles.rowLabel}>Методика управления весом</div>
+            <div style={styles.weightInputRow}>
+              <input
+                type="number"
+                placeholder="Введите вес (кг)"
+                style={styles.weightInput}
+                value={weightInput}
+                onChange={e => setWeightInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addWeightRecord()}
+              />
+              <button style={styles.weightAddBtn} onClick={addWeightRecord}>
+                + Добавить
+              </button>
+            </div>
+
+            {!weightLoaded ? (
+              <div style={styles.footnote}>Загружаю...</div>
+            ) : !weightRecords.length ? (
+              <div style={styles.weightEmpty}>Пока нет записей. Добавьте свой вес!</div>
+            ) : (
+              <div style={styles.foodList}>
+                {weightRecords.map((record) => (
+                  <div key={record.id} style={styles.foodRow}>
+                    <span style={{ flex: 1 }}>📊 {record.date}</span>
+                    <span style={styles.foodKcalTag}>{record.weight} кг</span>
+                    <button style={styles.ghostDelete} onClick={() => removeWeightRecord(record.id)}>
+                      <Trash2 />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Дневник питания */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>Дневник питания — сегодня</div>
             <div style={{ position: "relative" }}>
@@ -823,9 +943,7 @@
             )}
           </div>
 
-          {/* =============================================================
-              БЛОК 3: ВОДА
-              ============================================================= */}
+          {/* Вода */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
             <div style={styles.waterQuickRow}>
