@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Логово Жизни</title>
+  
+  <!-- ===== ЗАЩИТА ОТ КОПИРОВАНИЯ ===== -->
+  <script>
+    // 1. Блокировка правой кнопки
+    document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
+
+    // 2. Блокировка клавиш разработчика
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12') { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.key === 's') { e.preventDefault(); return false; }
+    });
+
+    // 3. Защита от выделения и копирования
+    document.addEventListener('selectstart', e => { e.preventDefault(); return false; });
+    document.addEventListener('copy', e => { e.preventDefault(); return false; });
+    document.addEventListener('dragstart', e => { e.preventDefault(); return false; });
+
+    // 4. Обнаружение открытых DevTools
+    function detectDevTools() {
+      const threshold = 160;
+      const widthDiff = window.outerWidth - window.innerWidth;
+      const heightDiff = window.outerHeight - window.innerHeight;
+      if (widthDiff > threshold || heightDiff > threshold) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#151312;color:#c2542a;font-family:sans-serif;font-size:24px;text-align:center;padding:20px;">🔒 Доступ ограничен<br><span style="font-size:16px;color:#9a9188;">Закройте инструменты разработчика</span></div>';
+      }
+    }
+    setInterval(detectDevTools, 2000);
+
+    // 5. Защита от iframe
+    if (window.top !== window.self) {
+      window.top.location = window.self.location;
+    }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body, #root {
+      background: #151312;
+      min-height: 100vh;
+      width: 100%;
+      color: #e9e2d6;
+      font-family: 'Inter', system-ui, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #151312; }
+    ::-webkit-scrollbar-thumb { background: #c2542a; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // ============================================================
+    // ОСНОВНОЙ КОД (ваш полный CalorieCalc)
+    // ============================================================
+
+    const { useState, useMemo, useEffect, useCallback } = React;
+
+    // ----- ИКОНКИ (замена lucide-react) -----
+    const Flame = () => <span style={{ fontSize: 16 }}>🔥</span>;
+    const Plus = () => <span style={{ fontSize: 15, fontWeight: 700 }}>+</span>;
+    const Trash2 = () => <span style={{ fontSize: 13 }}>✕</span>;
+    const Droplet = () => <span style={{ fontSize: 12 }}>💧</span>;
+
+    // ============================================================
+    // БАЗА ДАННЫХ
+    // ============================================================
+    const ACTIVITY = [
+      { key: "sedentary", label: "Минимум движения", mult: 1.2, hint: "сидячая работа, почти нет спорта" },
+      { key: "light", label: "Лёгкая активность", mult: 1.375, hint: "тренировки 1–3 раза в неделю" },
+      { key: "moderate", label: "Средняя активность", mult: 1.55, hint: "тренировки 3–5 раз в неделю" },
+      { key: "high", label: "Высокая активность", mult: 1.725, hint: "тренировки 6–7 раз в неделю" },
+      { key: "extreme", label: "Физическая работа + спорт", mult: 1.9, hint: "тяжёлый физический труд и тренировки" },
+    ];
+
+    const GOALS = [
+      { key: "dry", label: "Сушка", delta: -0.25 },
+      { key: "lose", label: "Снижение веса", delta: -0.2 },
+      { key: "maintain", label: "Удержание веса", delta: 0 },
+      { key: "gain", label: "Набор массы", delta: 0.12 },
+    ];
+
+    const RECOMMENDATIONS = {
+      dry: {
+        title: "Рекомендовано на сушке",
+        note: "Упор на белок, минимум быстрых углеводов и соусов, углеводы — в первой половине дня.",
+        items: ["Куриная грудка", "Яичный белок", "Творог 0%", "Тунец консервированный", "Креветки", "Гречка варёная", "Брокколи", "Шпинат", "Огурец", "Протеин изолят (порошок)"],
+      },
+      lose: {
+        title: "Рекомендовано для снижения веса",
+        note: "Баланс белка и клетчатки, порции круп и жиров — умеренные.",
+        items: ["Куриная грудка", "Творог 5%", "Рис белый варёный", "Овсянка на воде", "Брокколи", "Помидор", "Яблоко", "Греческий йогурт 2%", "Оливковое масло"],
+      },
+      maintain: {
+        title: "Рекомендовано для удержания веса",
+        note: "Разнообразный рацион без строгих ограничений, следим за общей калорийностью.",
+        items: ["Куриное бедро", "Лосось", "Яйцо целое", "Гречка варёная", "Картофель варёный", "Овощи разные", "Банан", "Миндаль", "Сыр твёрдый"],
+      },
+      gain: {
+        title: "Рекомендовано для набора массы",
+        note: "Больше плотных калорий: крупы, орехи, полезные жиры, регулярный профицит.",
+        items: ["Говядина постная", "Лосось", "Яйцо целое", "Рис белый варёный", "Овсянка сухая", "Картофель варёный", "Арахисовая паста", "Авокадо", "Гейнер (порошок)", "Банан"],
+      },
+    };
+
+    const WATER_QUICK = [
+      { label: "Стакан", ml: 250 },
+      { label: "Бутылка 0.5 л", ml: 500 },
+      { label: "Бутылка 1 л", ml: 1000 },
+      { label: "Бутылка 1.5 л", ml: 1500 },
+      { label: "Бутылка 2 л", ml: 2000 },
+    ];
+
+    const FOOD_DB = [
+      { name: "Куриная грудка", kcal: 165, protein: 31, fat: 3.6, carbs: 0 },
+      { name: "Куриное бедро", kcal: 209, protein: 18, fat: 15, carbs: 0 },
+      { name: "Говядина постная", kcal: 187, protein: 26, fat: 9, carbs: 0 },
+      { name: "Свинина", kcal: 242, protein: 21, fat: 18, carbs: 0 },
+      { name: "Лосось", kcal: 208, protein: 20, fat: 13, carbs: 0 },
+      { name: "Тунец консервированный", kcal: 116, protein: 26, fat: 1, carbs: 0 },
+      { name: "Креветки", kcal: 99, protein: 24, fat: 0.3, carbs: 0.2 },
+      { name: "Яйцо целое", kcal: 155, protein: 13, fat: 11, carbs: 1.1 },
+      { name: "Яичный белок", kcal: 52, protein: 11, fat: 0.2, carbs: 0.7 },
+      { name: "Творог 5%", kcal: 121, protein: 18, fat: 5, carbs: 3 },
+      { name: "Творог 0%", kcal: 71, protein: 16, fat: 0.6, carbs: 1.8 },
+      { name: "Греческий йогурт 2%", kcal: 73, protein: 9, fat: 2, carbs: 4 },
+      { name: "Молоко 2.5%", kcal: 52, protein: 2.8, fat: 2.5, carbs: 4.7 },
+      { name: "Кефир 1%", kcal: 40, protein: 3, fat: 1, carbs: 4 },
+      { name: "Сыр твёрдый", kcal: 363, protein: 24, fat: 29, carbs: 0 },
+      { name: "Тофу", kcal: 76, protein: 8, fat: 4.8, carbs: 1.9 },
+      { name: "Гречка сырая", kcal: 343, protein: 12.6, fat: 3.3, carbs: 62 },
+      { name: "Гречка варёная", kcal: 92, protein: 3.4, fat: 0.9, carbs: 17.1 },
+      { name: "Рис белый сырой", kcal: 344, protein: 6.7, fat: 0.6, carbs: 78 },
+      { name: "Рис белый варёный", kcal: 130, protein: 2.7, fat: 0.3, carbs: 28 },
+      { name: "Овсянка сухая", kcal: 389, protein: 16.9, fat: 6.9, carbs: 66 },
+      { name: "Овсянка на воде", kcal: 88, protein: 3, fat: 1.7, carbs: 15 },
+      { name: "Макароны варёные", kcal: 131, protein: 5, fat: 1.1, carbs: 25 },
+      { name: "Киноа варёная", kcal: 120, protein: 4.4, fat: 1.9, carbs: 21 },
+      { name: "Чечевица варёная", kcal: 116, protein: 9, fat: 0.4, carbs: 20 },
+      { name: "Нут варёный", kcal: 164, protein: 9, fat: 2.6, carbs: 27 },
+      { name: "Картофель варёный", kcal: 82, protein: 2, fat: 0.1, carbs: 17 },
+      { name: "Батат печёный", kcal: 90, protein: 2, fat: 0.1, carbs: 21 },
+      { name: "Хлеб белый", kcal: 265, protein: 9, fat: 3.2, carbs: 49 },
+      { name: "Хлеб ржаной/цельнозерновой", kcal: 259, protein: 8.5, fat: 3.3, carbs: 45 },
+      { name: "Брокколи", kcal: 34, protein: 2.8, fat: 0.4, carbs: 7 },
+      { name: "Огурец", kcal: 15, protein: 0.7, fat: 0.1, carbs: 3.6 },
+      { name: "Помидор", kcal: 18, protein: 0.9, fat: 0.2, carbs: 3.9 },
+      { name: "Перец болгарский", kcal: 26, protein: 1, fat: 0.3, carbs: 6 },
+      { name: "Шпинат", kcal: 23, protein: 2.9, fat: 0.4, carbs: 3.6 },
+      { name: "Морковь", kcal: 41, protein: 0.9, fat: 0.2, carbs: 10 },
+      { name: "Капуста белокочанная", kcal: 25, protein: 1.3, fat: 0.1, carbs: 6 },
+      { name: "Авокадо", kcal: 160, protein: 2, fat: 15, carbs: 9 },
+      { name: "Банан", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23 },
+      { name: "Яблоко", kcal: 52, protein: 0.3, fat: 0.2, carbs: 14 },
+      { name: "Апельсин", kcal: 47, protein: 0.9, fat: 0.1, carbs: 12 },
+      { name: "Клубника", kcal: 32, protein: 0.7, fat: 0.3, carbs: 8 },
+      { name: "Виноград", kcal: 69, protein: 0.7, fat: 0.2, carbs: 18 },
+      { name: "Миндаль", kcal: 579, protein: 21, fat: 50, carbs: 22 },
+      { name: "Грецкий орех", kcal: 654, protein: 15, fat: 65, carbs: 14 },
+      { name: "Арахисовая паста", kcal: 588, protein: 25, fat: 50, carbs: 20 },
+      { name: "Оливковое масло", kcal: 884, protein: 0, fat: 100, carbs: 0 },
+      { name: "Сливочное масло", kcal: 717, protein: 0.9, fat: 81, carbs: 0.1 },
+      { name: "Мёд", kcal: 304, protein: 0.3, fat: 0, carbs: 82 },
+      { name: "Сахар", kcal: 387, protein: 0, fat: 0, carbs: 100 },
+      { name: "Чизбургер", kcal: 250, protein: 13, fat: 12, carbs: 23, typicalGrams: 120 },
+      { name: "Гамбургер", kcal: 235, protein: 12, fat: 9, carbs: 28, typicalGrams: 110 },
+      { name: "Чикенбургер", kcal: 280, protein: 14, fat: 14, carbs: 26, typicalGrams: 160 },
+      { name: "Двойной чизбургер", kcal: 270, protein: 16, fat: 15, carbs: 20, typicalGrams: 170 },
+      { name: "Картофель фри", kcal: 312, protein: 3.4, fat: 15, carbs: 41, typicalGrams: 100 },
+      { name: "Наггетсы куриные", kcal: 296, protein: 15, fat: 18, carbs: 17, typicalGrams: 100 },
+      { name: "Хот-дог", kcal: 290, protein: 10, fat: 18, carbs: 22, typicalGrams: 150 },
+      { name: "Шаурма", kcal: 220, protein: 11, fat: 10, carbs: 20, typicalGrams: 300 },
+      { name: "Донер кебаб", kcal: 210, protein: 12, fat: 9, carbs: 20, typicalGrams: 300 },
+      { name: "Пицца Маргарита (кусок)", kcal: 266, protein: 11, fat: 10, carbs: 33, typicalGrams: 100 },
+      { name: "Пицца Пепперони (кусок)", kcal: 298, protein: 13, fat: 15, carbs: 30, typicalGrams: 100 },
+      { name: "Ролл Филадельфия", kcal: 176, protein: 6, fat: 8, carbs: 20, typicalGrams: 200 },
+      { name: "Ролл Калифорния", kcal: 150, protein: 5, fat: 5, carbs: 20, typicalGrams: 200 },
+      { name: "Кола", kcal: 42, protein: 0, fat: 0, carbs: 10.6, typicalGrams: 330 },
+      { name: "Сок апельсиновый", kcal: 45, protein: 0.7, fat: 0.2, carbs: 10, typicalGrams: 200 },
+      { name: "Пиво светлое", kcal: 43, protein: 0.5, fat: 0, carbs: 3.6, typicalGrams: 500 },
+      { name: "Кофе с молоком", kcal: 40, protein: 2, fat: 1.5, carbs: 4, typicalGrams: 250 },
+      { name: "Латте", kcal: 45, protein: 3, fat: 1.6, carbs: 4.5, typicalGrams: 300 },
+      { name: "Шоколад молочный", kcal: 534, protein: 7.7, fat: 30, carbs: 58, typicalGrams: 50 },
+      { name: "Шоколад тёмный 70%", kcal: 546, protein: 7.8, fat: 31, carbs: 46, typicalGrams: 50 },
+      { name: "Чипсы картофельные", kcal: 536, protein: 6.6, fat: 34, carbs: 53, typicalGrams: 50 },
+      { name: "Печенье овсяное", kcal: 437, protein: 6, fat: 18, carbs: 64, typicalGrams: 50 },
+      { name: "Мороженое пломбир", kcal: 227, protein: 3.5, fat: 15, carbs: 20, typicalGrams: 100 },
+      { name: "Попкорн", kcal: 375, protein: 9, fat: 15, carbs: 58, typicalGrams: 50 },
+      { name: "Майонез", kcal: 680, protein: 1, fat: 75, carbs: 2.6, typicalGrams: 20 },
+      { name: "Кетчуп", kcal: 112, protein: 1.2, fat: 0.2, carbs: 27, typicalGrams: 20 },
+      { name: "Соевый соус", kcal: 53, protein: 8, fat: 0, carbs: 5, typicalGrams: 15 },
+      { name: "Борщ", kcal: 49, protein: 2, fat: 2, carbs: 6, typicalGrams: 300 },
+      { name: "Оливье", kcal: 190, protein: 5, fat: 15, carbs: 8, typicalGrams: 150 },
+      { name: "Пельмени варёные", kcal: 220, protein: 11, fat: 9, carbs: 24, typicalGrams: 200 },
+      { name: "Плов", kcal: 200, protein: 8, fat: 8, carbs: 25, typicalGrams: 250 },
+      { name: "Паста Болоньезе", kcal: 151, protein: 8, fat: 5, carbs: 18, typicalGrams: 300 },
+      { name: "Цезарь с курицей", kcal: 175, protein: 12, fat: 11, carbs: 6, typicalGrams: 250 },
+      { name: "Греческий салат", kcal: 105, protein: 3, fat: 8, carbs: 5, typicalGrams: 200 },
+      { name: "Индейка филе", kcal: 143, protein: 19, fat: 8, carbs: 0 },
+      { name: "Утка", kcal: 337, protein: 16, fat: 29, carbs: 0 },
+      { name: "Баранина", kcal: 294, protein: 16, fat: 25, carbs: 0 },
+      { name: "Печень куриная", kcal: 140, protein: 20, fat: 6, carbs: 1 },
+      { name: "Печень говяжья", kcal: 127, protein: 17, fat: 3.7, carbs: 5.3 },
+      { name: "Сердце куриное", kcal: 158, protein: 16, fat: 10, carbs: 0.8 },
+      { name: "Колбаса варёная", kcal: 257, protein: 12, fat: 22, carbs: 1.5 },
+      { name: "Колбаса копчёная", kcal: 420, protein: 16, fat: 40, carbs: 0 },
+      { name: "Сосиски", kcal: 266, protein: 11, fat: 24, carbs: 2 },
+      { name: "Ветчина", kcal: 145, protein: 17, fat: 8, carbs: 1 },
+      { name: "Бекон", kcal: 541, protein: 12, fat: 55, carbs: 0.6 },
+      { name: "Сало", kcal: 797, protein: 2.4, fat: 89, carbs: 0 },
+      { name: "Треска", kcal: 78, protein: 18, fat: 0.7, carbs: 0 },
+      { name: "Минтай", kcal: 72, protein: 16, fat: 0.9, carbs: 0 },
+      { name: "Скумбрия", kcal: 205, protein: 18, fat: 14, carbs: 0 },
+      { name: "Сельдь", kcal: 216, protein: 18, fat: 15, carbs: 0 },
+      { name: "Форель", kcal: 119, protein: 20, fat: 3.5, carbs: 0 },
+      { name: "Кальмар", kcal: 92, protein: 18, fat: 1.2, carbs: 2 },
+      { name: "Мидии", kcal: 77, protein: 12, fat: 2, carbs: 3.7 },
+      { name: "Икра красная", kcal: 251, protein: 32, fat: 13, carbs: 4 },
+      { name: "Крабовые палочки", kcal: 94, protein: 8, fat: 1, carbs: 12 },
+      { name: "Сметана 20%", kcal: 206, protein: 2.8, fat: 20, carbs: 3.2 },
+      { name: "Сливки 10%", kcal: 118, protein: 3, fat: 10, carbs: 4 },
+      { name: "Йогурт натуральный", kcal: 66, protein: 5, fat: 3.2, carbs: 4 },
+      { name: "Ряженка", kcal: 54, protein: 2.9, fat: 2.5, carbs: 4.2 },
+      { name: "Сыр моцарелла", kcal: 280, protein: 22, fat: 22, carbs: 2 },
+      { name: "Сыр фета", kcal: 264, protein: 14, fat: 21, carbs: 4 },
+      { name: "Сыр плавленый", kcal: 257, protein: 12, fat: 22, carbs: 3.5 },
+      { name: "Сгущённое молоко", kcal: 320, protein: 7.5, fat: 8.5, carbs: 55 },
+      { name: "Перловка варёная", kcal: 109, protein: 3.1, fat: 0.4, carbs: 23 },
+      { name: "Пшённая каша варёная", kcal: 90, protein: 3, fat: 1.1, carbs: 17 },
+      { name: "Манная каша на молоке", kcal: 98, protein: 3, fat: 3.2, carbs: 15 },
+      { name: "Кускус варёный", kcal: 112, protein: 3.8, fat: 0.2, carbs: 23 },
+      { name: "Булгур варёный", kcal: 83, protein: 3, fat: 0.2, carbs: 18 },
+      { name: "Фасоль варёная", kcal: 127, protein: 8.7, fat: 0.5, carbs: 21 },
+      { name: "Горох варёный", kcal: 90, protein: 6, fat: 0.4, carbs: 16 },
+      { name: "Кукуруза консервированная", kcal: 58, protein: 2.7, fat: 0.5, carbs: 12 },
+      { name: "Лаваш", kcal: 236, protein: 7.9, fat: 1, carbs: 47 },
+      { name: "Батон", kcal: 262, protein: 7.5, fat: 2.9, carbs: 51 },
+      { name: "Хлебцы цельнозерновые", kcal: 310, protein: 10, fat: 2, carbs: 60 },
+      { name: "Кабачок", kcal: 24, protein: 0.6, fat: 0.3, carbs: 4.6 },
+      { name: "Баклажан", kcal: 25, protein: 1, fat: 0.1, carbs: 5.9 },
+      { name: "Свёкла варёная", kcal: 44, protein: 1.7, fat: 0.1, carbs: 10 },
+      { name: "Редис", kcal: 16, protein: 0.7, fat: 0.1, carbs: 3.4 },
+      { name: "Лук репчатый", kcal: 41, protein: 1.1, fat: 0.1, carbs: 9.3 },
+      { name: "Чеснок", kcal: 149, protein: 6.5, fat: 0.5, carbs: 30 },
+      { name: "Грибы шампиньоны", kcal: 27, protein: 4.3, fat: 1, carbs: 0.1 },
+      { name: "Зелень (укроп, петрушка)", kcal: 40, protein: 3.3, fat: 0.4, carbs: 6.5 },
+      { name: "Салат листовой", kcal: 15, protein: 1.4, fat: 0.2, carbs: 2.4 },
+      { name: "Груша", kcal: 47, protein: 0.4, fat: 0.1, carbs: 11 },
+      { name: "Персик", kcal: 39, protein: 0.9, fat: 0.3, carbs: 9.5 },
+      { name: "Киви", kcal: 61, protein: 1.1, fat: 0.5, carbs: 15 },
+      { name: "Мандарин", kcal: 53, protein: 0.8, fat: 0.2, carbs: 13 },
+      { name: "Арбуз", kcal: 30, protein: 0.6, fat: 0.2, carbs: 8 },
+      { name: "Дыня", kcal: 34, protein: 0.8, fat: 0.2, carbs: 8.6 },
+      { name: "Черника", kcal: 39, protein: 1.1, fat: 0.3, carbs: 8.6 },
+      { name: "Малина", kcal: 46, protein: 1.2, fat: 0.7, carbs: 8.3 },
+      { name: "Курага", kcal: 232, protein: 3.4, fat: 0.5, carbs: 55 },
+      { name: "Чернослив", kcal: 240, protein: 2.3, fat: 0.4, carbs: 58 },
+      { name: "Изюм", kcal: 299, protein: 3, fat: 0.5, carbs: 66 },
+      { name: "Финики", kcal: 282, protein: 2.5, fat: 0.4, carbs: 65 },
+      { name: "Кешью", kcal: 553, protein: 18, fat: 44, carbs: 30 },
+      { name: "Фундук", kcal: 628, protein: 15, fat: 61, carbs: 17 },
+      { name: "Семена подсолнечника", kcal: 584, protein: 21, fat: 50, carbs: 20 },
+      { name: "Семена чиа", kcal: 486, protein: 17, fat: 31, carbs: 42 },
+      { name: "Кунжут", kcal: 573, protein: 18, fat: 50, carbs: 23 },
+      { name: "Сырники", kcal: 235, protein: 15, fat: 12, carbs: 18, typicalGrams: 150 },
+      { name: "Блины", kcal: 233, protein: 6.1, fat: 8, carbs: 34, typicalGrams: 150 },
+      { name: "Омлет", kcal: 184, protein: 12, fat: 14, carbs: 2, typicalGrams: 150 },
+      { name: "Голубцы", kcal: 100, protein: 6, fat: 5, carbs: 8, typicalGrams: 250 },
+      { name: "Котлета мясная", kcal: 220, protein: 15, fat: 16, carbs: 6, typicalGrams: 100 },
+      { name: "Котлета куриная", kcal: 180, protein: 17, fat: 10, carbs: 5, typicalGrams: 100 },
+      { name: "Рыба жареная", kcal: 210, protein: 20, fat: 14, carbs: 4, typicalGrams: 150 },
+      { name: "Гуляш", kcal: 170, protein: 14, fat: 10, carbs: 6, typicalGrams: 250 },
+      { name: "Рагу овощное", kcal: 65, protein: 2, fat: 3, carbs: 8, typicalGrams: 250 },
+      { name: "Солянка", kcal: 90, protein: 6, fat: 6, carbs: 3, typicalGrams: 300 },
+      { name: "Щи", kcal: 40, protein: 2, fat: 2, carbs: 4, typicalGrams: 300 },
+      { name: "Суп куриный", kcal: 45, protein: 4, fat: 2, carbs: 4, typicalGrams: 300 },
+      { name: "Вареники с картошкой", kcal: 180, protein: 5, fat: 4, carbs: 30, typicalGrams: 200 },
+      { name: "Пирожок с мясом", kcal: 260, protein: 8, fat: 12, carbs: 30, typicalGrams: 100 },
+      { name: "Шашлык свиной", kcal: 280, protein: 20, fat: 22, carbs: 0, typicalGrams: 200 },
+      { name: "Шашлык куриный", kcal: 190, protein: 22, fat: 11, carbs: 0, typicalGrams: 200 },
+      { name: "Чай без сахара", kcal: 1, protein: 0, fat: 0, carbs: 0.3, typicalGrams: 250 },
+      { name: "Кофе чёрный без сахара", kcal: 2, protein: 0.1, fat: 0, carbs: 0, typicalGrams: 200 },
+      { name: "Смузи фруктовый", kcal: 65, protein: 0.8, fat: 0.3, carbs: 15, typicalGrams: 250 },
+      { name: "Компот", kcal: 60, protein: 0.2, fat: 0, carbs: 15, typicalGrams: 250 },
+      { name: "Морс", kcal: 45, protein: 0.1, fat: 0, carbs: 11, typicalGrams: 250 },
+      { name: "Энергетик", kcal: 45, protein: 0, fat: 0, carbs: 11, typicalGrams: 250 },
+      { name: "Вино красное сухое", kcal: 68, protein: 0.2, fat: 0, carbs: 0.3, typicalGrams: 150 },
+      { name: "Вино белое сухое", kcal: 66, protein: 0.1, fat: 0, carbs: 0.6, typicalGrams: 150 },
+      { name: "Горчица", kcal: 143, protein: 5.7, fat: 8.4, carbs: 12 },
+      { name: "Сметанный соус", kcal: 210, protein: 2, fat: 20, carbs: 5 },
+      { name: "Ткемали", kcal: 40, protein: 0.6, fat: 0.1, carbs: 9 },
+      { name: "Терияки соус", kcal: 89, protein: 5.9, fat: 0, carbs: 16 },
+      { name: "Пастила", kcal: 310, protein: 0.5, fat: 0.1, carbs: 80, typicalGrams: 40 },
+      { name: "Зефир", kcal: 304, protein: 0.8, fat: 0.2, carbs: 79, typicalGrams: 40 },
+      { name: "Вафли", kcal: 425, protein: 3.2, fat: 21, carbs: 55, typicalGrams: 50 },
+      { name: "Пряники", kcal: 350, protein: 4.8, fat: 2.8, carbs: 77, typicalGrams: 50 },
+      { name: "Сухарики", kcal: 470, protein: 9, fat: 20, carbs: 60, typicalGrams: 50 },
+      { name: "Крекеры", kcal: 430, protein: 9, fat: 12, carbs: 70, typicalGrams: 50 },
+      { name: "Батончик злаковый", kcal: 380, protein: 6, fat: 10, carbs: 65, typicalGrams: 40 },
+      { name: "Сухое печенье (Мария)", kcal: 400, protein: 8, fat: 9, carbs: 74, typicalGrams: 50 },
+      { name: "Протеин сывороточный (порошок)", kcal: 380, protein: 75, fat: 5, carbs: 8, typicalGrams: 30 },
+      { name: "Протеин изолят (порошок)", kcal: 370, protein: 85, fat: 1.5, carbs: 3, typicalGrams: 30 },
+      { name: "Казеин (порошок)", kcal: 360, protein: 75, fat: 2, carbs: 6, typicalGrams: 30 },
+      { name: "Протеиновый батончик", kcal: 380, protein: 30, fat: 12, carbs: 35, typicalGrams: 50 },
+      { name: "Гейнер (порошок)", kcal: 380, protein: 20, fat: 3, carbs: 70, typicalGrams: 100 },
+      { name: "BCAA (порошок)", kcal: 6, protein: 1.5, fat: 0, carbs: 0, typicalGrams: 10 },
+      { name: "Креатин моногидрат", kcal: 0, protein: 0, fat: 0, carbs: 0, typicalGrams: 5 },
+    ];
+
+    const uid = () => Math.random().toString(36).slice(2, 10);
+    const dateStr = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const foodKeyToday = () => `foodlog:${dateStr()}`;
+    const waterKeyToday = () => `waterlog:${dateStr()}`;
+
+    // ============================================================
+    // ГЛАВНЫЙ КОМПОНЕНТ
+    // ============================================================
+    function CalorieCalc() {
+      const [sex, setSex] = useState("male");
+      const [age, setAge] = useState(28);
+      const [weight, setWeight] = useState(80);
+      const [height, setHeight] = useState(178);
+      const [activity, setActivity] = useState("light");
+      const [goal, setGoal] = useState("lose");
+
+      const [log, setLog] = useState([]);
+      const [logLoaded, setLogLoaded] = useState(false);
+      const [foodName, setFoodName] = useState("");
+      const [foodKcal, setFoodKcal] = useState("");
+      const [foodProtein, setFoodProtein] = useState("");
+      const [foodFat, setFoodFat] = useState("");
+      const [foodCarbs, setFoodCarbs] = useState("");
+      const [selectedFood, setSelectedFood] = useState(null);
+      const [grams, setGrams] = useState(100);
+      const [showSuggestions, setShowSuggestions] = useState(false);
+
+      const [water, setWater] = useState([]);
+      const [waterLoaded, setWaterLoaded] = useState(false);
+      const [customMl, setCustomMl] = useState("");
+
+      const foodKey = foodKeyToday();
+      const waterKey = waterKeyToday();
+
+      useEffect(() => {
+        (async () => {
+          try {
+            const r = await window.storage.get(foodKey, false);
+            setLog(r ? JSON.parse(r.value) : []);
+          } catch { setLog([]); }
+          setLogLoaded(true);
+          try {
+            const r2 = await window.storage.get(waterKey, false);
+            setWater(r2 ? JSON.parse(r2.value) : []);
+          } catch { setWater([]); }
+          setWaterLoaded(true);
+        })();
+      }, []);
+
+      const persistLog = useCallback(async (next) => {
+        try { await window.storage.set(foodKey, JSON.stringify(next), false); } catch {}
+      }, [foodKey]);
+
+      const persistWater = useCallback(async (next) => {
+        try { await window.storage.set(waterKey, JSON.stringify(next), false); } catch {}
+      }, [waterKey]);
+
+      const suggestions = useMemo(() => {
+        const q = foodName.trim().toLowerCase();
+        if (!q || selectedFood) return [];
+        return FOOD_DB.filter((f) => f.name.toLowerCase().includes(q)).slice(0, 6);
+      }, [foodName, selectedFood]);
+
+      const computedFromDb = useMemo(() => {
+        if (!selectedFood) return null;
+        const g = Number(grams) || 0;
+        const ratio = g / 100;
+        return {
+          kcal: Math.round(selectedFood.kcal * ratio),
+          protein: Math.round(selectedFood.protein * ratio * 10) / 10,
+          fat: Math.round(selectedFood.fat * ratio * 10) / 10,
+          carbs: Math.round(selectedFood.carbs * ratio * 10) / 10,
+        };
+      }, [selectedFood, grams]);
+
+      function pickFromRecommendation(name) {
+        const dbFood = FOOD_DB.find((f) => f.name === name);
+        if (dbFood) {
+          pickSuggestion(dbFood);
+        } else {
+          setFoodName(name);
+          setSelectedFood(null);
+        }
+      }
+
+      function pickSuggestion(food) {
+        setSelectedFood(food);
+        setFoodName(food.name);
+        setGrams(food.typicalGrams || 100);
+        setShowSuggestions(false);
+      }
+
+      function onFoodNameChange(v) {
+        setFoodName(v);
+        setShowSuggestions(true);
+        if (selectedFood && v !== selectedFood.name) setSelectedFood(null);
+      }
+
+      function addFood() {
+        const name = foodName.trim();
+        if (!name) return;
+        let entry;
+        if (selectedFood && computedFromDb) {
+          if (!computedFromDb.kcal) return;
+          entry = { id: uid(), name: `${name} (${grams} г)`, ...computedFromDb };
+        } else {
+          const kcal = Number(foodKcal);
+          if (!kcal) return;
+          entry = {
+            id: uid(),
+            name,
+            kcal,
+            protein: Number(foodProtein) || 0,
+            fat: Number(foodFat) || 0,
+            carbs: Number(foodCarbs) || 0,
+          };
+        }
+        const next = [...log, entry];
+        setLog(next);
+        persistLog(next);
+        setFoodName("");
+        setFoodKcal("");
+        setFoodProtein("");
+        setFoodFat("");
+        setFoodCarbs("");
+        setSelectedFood(null);
+        setGrams(100);
+      }
+
+      function removeFood(id) {
+        const next = log.filter((f) => f.id !== id);
+        setLog(next);
+        persistLog(next);
+      }
+
+      function addWater(ml) {
+        if (!ml) return;
+        const next = [...water, { id: uid(), ml }];
+        setWater(next);
+        persistWater(next);
+      }
+
+      function addCustomWater() {
+        const ml = Number(customMl);
+        if (!ml) return;
+        addWater(ml);
+        setCustomMl("");
+      }
+
+      function removeWater(id) {
+        const next = water.filter((w) => w.id !== id);
+        setWater(next);
+        persistWater(next);
+      }
+
+      const result = useMemo(() => {
+        const a = Number(age) || 0;
+        const w = Number(weight) || 0;
+        const h = Number(height) || 0;
+        const bmr = sex === "male" ? 10 * w + 6.25 * h - 5 * a + 5 : 10 * w + 6.25 * h - 5 * a - 161;
+        const mult = ACTIVITY.find((x) => x.key === activity)?.mult ?? 1.2;
+        const tdee = bmr * mult;
+        const g = GOALS.find((x) => x.key === goal);
+        const target = tdee * (1 + g.delta);
+        const protein = w * (goal === "dry" ? 2.3 : goal === "lose" ? 2.0 : goal === "gain" ? 1.8 : 1.6);
+        const fat = (target * 0.27) / 9;
+        const carbs = (target - protein * 4 - fat * 9) / 4;
+        const activityIdx = ACTIVITY.findIndex((x) => x.key === activity);
+        const waterTarget = w * 33 + Math.max(0, activityIdx - 1) * 350;
+        return { bmr, tdee, target, protein, fat, carbs: Math.max(carbs, 0), waterTarget };
+      }, [sex, age, weight, height, activity, goal]);
+
+      const eaten = log.reduce((sum, f) => sum + f.kcal, 0);
+      const eatenProtein = log.reduce((sum, f) => sum + (f.protein || 0), 0);
+      const eatenFat = log.reduce((sum, f) => sum + (f.fat || 0), 0);
+      const eatenCarbs = log.reduce((sum, f) => sum + (f.carbs || 0), 0);
+
+      const remaining = Math.round(result.target - eaten);
+      const over = remaining < 0;
+      const ringPct = Math.min(100, (eaten / (result.target || 1)) * 100);
+
+      const drunk = water.reduce((sum, w) => sum + w.ml, 0);
+      const waterRemaining = Math.max(0, Math.round(result.waterTarget - drunk));
+      const waterPct = Math.min(100, (drunk / (result.waterTarget || 1)) * 100);
+      const waterDone = drunk >= result.waterTarget;
+
+      const styles = {
+        app: { background: "#151312", color: "#e9e2d6", padding: 14, borderRadius: 12, border: "1px solid #322d29", maxWidth: 640, width: "calc(100% - 16px)", margin: "0 auto" },
+        header: { display: "flex", alignItems: "center", gap: 9, marginBottom: 16 },
+        brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 0.5 },
+        sub: { fontSize: 11, color: "#9a9188" },
+        grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+        card: { background: "#1c1a18", border: "1px solid #322d29", borderRadius: 10, padding: 14 },
+        rowLabel: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "10px 0 6px" },
+        segRow: { display: "flex", gap: 6 },
+        seg: { flex: 1, background: "#211e1b", border: "1px solid transparent", color: "#9a9188", borderRadius: 7, padding: "7px 6px", fontSize: 11.5, cursor: "pointer" },
+        segActive: { background: "#c2542a", color: "#1c1a18", fontWeight: 700 },
+        fieldsRow: { display: "flex", gap: 8, margin: "12px 0 2px" },
+        field: { flex: 1, display: "flex", flexDirection: "column", gap: 4 },
+        fieldLabel: { fontSize: 10.5, color: "#9a9188" },
+        fieldInputWrap: { display: "flex", alignItems: "center", background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "6px 8px" },
+        fieldInput: { background: "transparent", border: "none", color: "#3fb7a6", width: "100%", fontSize: 14, fontWeight: 600 },
+        fieldUnit: { fontSize: 10, color: "#9a9188" },
+        optRow: { display: "flex", alignItems: "center", gap: 8, background: "#211e1b", border: "1px solid transparent", borderRadius: 7, padding: "7px 9px", cursor: "pointer" },
+        optRowActive: { borderColor: "#c2542a", background: "#241d18" },
+        optDot: (active) => ({ width: 8, height: 8, borderRadius: "50%", background: active ? "#c2542a" : "#322d29" }),
+        optLabel: { fontSize: 12, fontWeight: 600 },
+        optHint: { fontSize: 10, color: "#9a9188" },
+        ringsRow: { display: "flex", justifyContent: "center", gap: 10, padding: "4px 0 10px" },
+        ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 4 },
+        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 21, fontWeight: 700, fill: "#e9e2d6" },
+        ringUnit: { fontSize: 8.5, fill: "#9a9188" },
+        ringCaption: { fontSize: 10, fontWeight: 700 },
+        statRow: { display: "flex", gap: 8, marginBottom: 14 },
+        statBox: { flex: 1, background: "#211e1b", border: "1px solid #322d29", borderRadius: 8, padding: "8px 10px", textAlign: "center" },
+        statValue: { fontFamily: "'Oswald', sans-serif", fontSize: 16, fontWeight: 700, color: "#3fb7a6" },
+        statLabel: { fontSize: 9.5, color: "#9a9188" },
+        macroTitle: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", marginBottom: 6 },
+        macroRow: { display: "flex", gap: 8 },
+        macroBox: { flex: 1, display: "flex", flexDirection: "column", gap: 4 },
+        macroBarTrack: { height: 5, borderRadius: 3, background: "#211e1b", overflow: "hidden" },
+        macroBarFill: { height: "100%", borderRadius: 3, transition: "width 0.4s ease" },
+        macroValue: { fontSize: 12.5, fontWeight: 700 },
+        macroLabel: { fontSize: 10, color: "#9a9188" },
+        foodNameInput: { width: "100%", background: "#211e1b", border: "1px solid #322d29", color: "#e9e2d6", borderRadius: 7, padding: "8px 10px", fontSize: 12.5, marginBottom: 6 },
+        foodKcalInput: { width: 80, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 7, padding: "8px 10px", fontSize: 12.5, textAlign: "center" },
+        addFoodBtn: { width: 36, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 7, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
+        macroInputRow: { display: "flex", gap: 6, marginBottom: 10, alignItems: "flex-end", flexWrap: "wrap" },
+        miniField: { flex: 1, minWidth: 52, display: "flex", flexDirection: "column", gap: 3 },
+        miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "7px 6px", fontSize: 12.5, textAlign: "center", fontWeight: 600, width: "100%" },
+        miniFieldLabel: { fontSize: 8.5, color: "#9a9188", textAlign: "center" },
+        foodList: { display: "flex", flexDirection: "column", gap: 5 },
+        foodRow: { display: "flex", alignItems: "center", gap: 8, background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "6px 10px", fontSize: 12 },
+        foodKcalTag: { color: "#3fb7a6", fontWeight: 600, textAlign: "right", flexShrink: 0 },
+        macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 10 },
+        ghostDelete: { background: "transparent", border: "none", color: "#9a9188", cursor: "pointer" },
+        waterQuickRow: { display: "flex", gap: 6, marginBottom: 8, flexWrap: "wrap" },
+        waterQuickBtn: { background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 7, padding: "6px 10px", fontSize: 11.5, cursor: "pointer", fontWeight: 600 },
+        footnote: { fontSize: 10, color: "#9a9188", lineHeight: 1.5, marginTop: 10 },
+        foodInputRow: { display: "flex", gap: 6, marginBottom: 10 },
+        dbRow: { display: "flex", gap: 8, alignItems: "flex-end", marginBottom: 4 },
+        dbPreview: { flex: 1, fontSize: 12, paddingBottom: 6 },
+        suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 8, overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.4)" },
+        suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "8px 10px", fontSize: 12, cursor: "pointer", textAlign: "left" },
+        suggestMeta: { fontSize: 10.5, color: "#9a9188" },
+        recoChips: { display: "flex", flexWrap: "wrap", gap: 6 },
+        recoChip: { background: "#211e1b", border: "1px solid #322d29", color: "#e9e2d6", borderRadius: 999, padding: "6px 12px", fontSize: 11.5, cursor: "pointer" },
+      };
+
+      return (
+        <div style={styles.app}>
+          <div style={styles.header}>
+            <div style={{ width: 30, height: 30, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Flame />
+            </div>
+            <div>
+              <div style={styles.brand}>ЛОГОВО ЖИЗНИ</div>
+              <div style={styles.sub}>норма калорий · еда · вода за день</div>
+            </div>
+          </div>
+
+          <div style={styles.grid}>
+            <div style={styles.card}>
+              <div style={styles.rowLabel}>Пол</div>
+              <div style={styles.segRow}>
+                <button style={{ ...styles.seg, ...(sex === "male" ? styles.segActive : {}) }} onClick={() => setSex("male")}>Мужской</button>
+                <button style={{ ...styles.seg, ...(sex === "female" ? styles.segActive : {}) }} onClick={() => setSex("female")}>Женский</button>
+              </div>
+
+              <div style={styles.fieldsRow}>
+                <div style={styles.field}>
+                  <span style={styles.fieldLabel}>Возраст</span>
+                  <div style={styles.fieldInputWrap}>
+                    <input type="number" value={age} onChange={e => setAge(e.target.value)} style={styles.fieldInput} />
+                    <span style={styles.fieldUnit}>лет</span>
+                  </div>
+                </div>
+                <div style={styles.field}>
+                  <span style={styles.fieldLabel}>Вес</span>
+                  <div style={styles.fieldInputWrap}>
+                    <input type="number" value={weight} onChange={e => setWeight(e.target.value)} style={styles.fieldInput} />
+                    <span style={styles.fieldUnit}>кг</span>
+                  </div>
+                </div>
+                <div style={styles.field}>
+                  <span style={styles.fieldLabel}>Рост</span>
+                  <div style={styles.fieldInputWrap}>
+                    <input type="number" value={height} onChange={e => setHeight(e.target.value)} style={styles.fieldInput} />
+                    <span style={styles.fieldUnit}>см</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.rowLabel}>Активность</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {ACTIVITY.map(a => (
+                  <button key={a.key} onClick={() => setActivity(a.key)} style={{ ...styles.optRow, ...(activity === a.key ? styles.optRowActive : {}) }}>
+                    <span style={styles.optDot(activity === a.key)} />
+                    <span style={{ flex: 1, textAlign: "left" }}>
+                      <div style={styles.optLabel}>{a.label}</div>
+                      <div style={styles.optHint}>{a.hint}</div>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div style={styles.rowLabel}>Цель</div>
+              <div style={styles.segRow}>
+                {GOALS.map(g => (
+                  <button key={g.key} style={{ ...styles.seg, ...(goal === g.key ? styles.segActive : {}) }} onClick={() => setGoal(g.key)}>
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={styles.card}>
+              <div style={styles.ringsRow}>
+                <div style={styles.ringCol}>
+                  <svg viewBox="0 0 140 140" style={{ width: 128, height: 128 }}>
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
+                    <circle cx="70" cy="70" r="58" fill="none" stroke={over ? "#d9503f" : "#c2542a"} strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - ringPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
+                    <text x="70" y="66" textAnchor="middle" style={styles.ringNumber}>{Math.round(eaten)}</text>
+                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>ккал съедено</text>
+                  </svg>
+                  <div style={{ ...styles.ringCaption, color: over ? "#d9503f" : "#c2542a" }}>
+                    {over ? `перебор на ${Math.abs(remaining)}` : `осталось ${remaining} ккал`}
+                  </div>
+                </div>
+
+                <div style={styles.ringCol}>
+                  <svg viewBox="0 0 140 140" style={{ width: 128, height: 128 }}>
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
+                    <circle cx="70" cy="70" r="58" fill="none" stroke="#3fb7a6" strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - waterPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
+                    <text x="70" y="66" textAnchor="middle" style={{ ...styles.ringNumber, fill: "#3fb7a6" }}>{(drunk / 1000).toFixed(1)}л</text>
+                    <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>воды выпито</text>
+                  </svg>
+                  <div style={{ ...styles.ringCaption, color: "#3fb7a6" }}>
+                    {waterDone ? "норма выполнена 💧" : `осталось ${waterRemaining} мл`}
+                  </div>
+                </div>
+              </div>
+
+              <div style={styles.statRow}>
+                <div style={styles.statBox}>
+                  <div style={styles.statValue}>{Math.round(result.target)}</div>
+                  <div style={styles.statLabel}>Норма калорий</div>
+                </div>
+                <div style={styles.statBox}>
+                  <div style={styles.statValue}>{(result.waterTarget / 1000).toFixed(1)} л</div>
+                  <div style={styles.statLabel}>Норма воды</div>
+                </div>
+              </div>
+
+              <div style={styles.macroTitle}>БЖУ — съедено / норма на день</div>
+              <div style={styles.macroRow}>
+                <div style={styles.macroBox}>
+                  <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenProtein / result.protein) * 100)}%`, background: "#3fb7a6" }} /></div>
+                  <div style={styles.macroValue}>{Math.round(eatenProtein)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.protein)} г</span></div>
+                  <div style={styles.macroLabel}>Белки</div>
+                </div>
+                <div style={styles.macroBox}>
+                  <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenFat / result.fat) * 100)}%`, background: "#c2542a" }} /></div>
+                  <div style={styles.macroValue}>{Math.round(eatenFat)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.fat)} г</span></div>
+                  <div style={styles.macroLabel}>Жиры</div>
+                </div>
+                <div style={styles.macroBox}>
+                  <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenCarbs / result.carbs) * 100)}%`, background: "#9a9188" }} /></div>
+                  <div style={styles.macroValue}>{Math.round(eatenCarbs)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.carbs)} г</span></div>
+                  <div style={styles.macroLabel}>Углеводы</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 12 }}>
+            <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
+            <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 10 }}>{RECOMMENDATIONS[goal].note}</p>
+            <div style={styles.recoChips}>
+              {RECOMMENDATIONS[goal].items.map((item) => (
+                <button key={item} style={styles.recoChip} onClick={() => pickFromRecommendation(item)}>
+                  + {item}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 12 }}>
+            <div style={styles.rowLabel}>Дневник питания — сегодня</div>
+            <div style={{ position: "relative" }}>
+              <input style={styles.foodNameInput} placeholder="начни вводить продукт (например, куриная)" value={foodName} onChange={e => { setFoodName(e.target.value); setShowSuggestions(true); if (selectedFood) setSelectedFood(null); }} onFocus={() => setShowSuggestions(true)} onBlur={() => setTimeout(() => setShowSuggestions(false), 120)} onKeyDown={e => e.key === "Enter" && addFood()} />
+              {showSuggestions && suggestions.length > 0 && (
+                <div style={styles.suggestBox}>
+                  {suggestions.map(f => (
+                    <button key={f.name} style={styles.suggestItem} onMouseDown={() => pickSuggestion(f)}>
+                      <span>{f.name}</span>
+                      <span style={styles.suggestMeta}>{f.kcal} ккал/100g{f.typicalGrams ? ` · порция ~${f.typicalGrams}г` : ""}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedFood ? (
+              <div style={styles.dbRow}>
+                <div style={styles.miniField}>
+                  <input type="number" value={grams} onChange={e => setGrams(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
+                  <span style={styles.miniFieldLabel}>граммы</span>
+                </div>
+                <div style={styles.dbPreview}>
+                  {computedFromDb && <span style={{ color: "#c2542a", fontWeight: 700 }}>{computedFromDb.kcal} ккал <span style={{ color: "#9a9188", fontWeight: 400 }}>Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}</span></span>}
+                </div>
+                <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
+              </div>
+            ) : (
+              <div style={styles.macroInputRow}>
+                <div style={styles.miniField}>
+                  <input type="number" placeholder="0" value={foodKcal} onChange={e => setFoodKcal(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
+                  <span style={styles.miniFieldLabel}>ккал</span>
+                </div>
+                <div style={styles.miniField}>
+                  <input type="number" placeholder="0" value={foodProtein} onChange={e => setFoodProtein(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
+                  <span style={styles.miniFieldLabel}>белки г</span>
+                </div>
+                <div style={styles.miniField}>
+                  <input type="number" placeholder="0" value={foodFat} onChange={e => setFoodFat(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
+                  <span style={styles.miniFieldLabel}>жиры г</span>
+                </div>
+                <div style={styles.miniField}>
+                  <input type="number" placeholder="0" value={foodCarbs} onChange={e => setFoodCarbs(e.target.value)} style={{ ...styles.miniFieldInput, color: "#9a9188" }} />
+                  <span style={styles.miniFieldLabel}>углев г</span>
+                </div>
+                <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
+              </div>
+            )}
+
+            {!logLoaded ? <div style={styles.footnote}>Загружаю...</div> : !log.length ? <div style={styles.footnote}>Пока пусто — добавь первый приём пищи выше.</div> : (
+              <div style={styles.foodList}>
+                {log.map(f => (
+                  <div key={f.id} style={styles.foodRow}>
+                    <span style={{ flex: 1 }}>{f.name}</span>
+                    <span style={styles.foodKcalTag}>{f.kcal} ккал{(f.protein || f.fat || f.carbs) && <span style={styles.macroTag}> Б{f.protein || 0}/Ж{f.fat || 0}/У{f.carbs || 0}</span>}</span>
+                    <button style={styles.ghostDelete} onClick={() => removeFood(f.id)}><Trash2 /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 12 }}>
+            <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
+            <div style={styles.waterQuickRow}>
+              {WATER_QUICK.map(q => (
+                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>+ {q.label} ({q.ml} мл)</button>
+              ))}
+            </div>
+            <div style={styles.foodInputRow}>
+              <input style={styles.foodKcalInput} placeholder="мл" type="number" value={customMl} onChange={e => setCustomMl(e.target.value)} onKeyDown={e => e.key === "Enter" && addCustomWater()} />
+              <button style={styles.addFoodBtn} onClick={addCustomWater}><Plus /></button>
+            </div>
+            {!waterLoaded ? <div style={styles.footnote}>Загружаю…</div> : !water.length ? <div style={styles.footnote}>Пока пусто — отметь первый стакан воды.</div> : (
+              <div style={styles.foodList}>
+                {water.map(w => (
+                  <div key={w.id} style={styles.foodRow}>
+                    <span style={{ flex: 1 }}>💧 вода</span>
+                    <span style={styles.foodKcalTag}>{w.ml} мл</span>
+                    <button style={styles.ghostDelete} onClick={() => removeWater(w.id)}><Trash2 /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p style={styles.footnote}>Дневники видны только тебе и сбрасываются на новый день. Расчёты ориентировочные — для точной корректировки подключи консультацию с тренером.</p>
+          </div>
+        </div>
+      );
+    }
+    // ============================================================
+    // STORAGE И ЗАПУСК
+    // ============================================================
+
+    window.storage = {
+      get: (key, sync) => {
+        try {
+          const val = localStorage.getItem(key);
+          return Promise.resolve(val ? { value: val } : null);
+        } catch { return Promise.resolve(null); }
+      },
+      set: (key, value, sync) => {
+        try {
+          localStorage.setItem(key, value);
+          return Promise.resolve();
+        } catch { return Promise.resolve(); }
+      }
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<CalorieCalc />);
+  </script>
+</body>
+</html>
