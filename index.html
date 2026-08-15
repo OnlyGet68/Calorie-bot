@@ -5,16 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Логово Жизни</title>
 
-  <!-- ПОДКЛЮЧАЕМ TELEGRAM WEBAPP SDK -->
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- ГРАФИКИ -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- ШРИФТЫ -->
+  <!-- Шрифты -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet" />
 
-  <!-- REACT -->
+  <!-- React -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -29,6 +26,8 @@
       font-family: 'Inter', system-ui, sans-serif;
       user-select: none;
       -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #151312; }
@@ -40,20 +39,45 @@
 
   <script type="text/babel">
     // =============================================================
-    // ВЕСЬ ТВОЙ КОД (React-компонент CalorieCalc)
-    // С ДОПОЛНЕНИЕМ ДЛЯ TELEGRAM WEBAPP И ГРАФИКОМ ВЕСА
+    // ЗАЩИТА ОТ КОПИРОВАНИЯ
     // =============================================================
+    document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12') { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.key === 'u') { e.preventDefault(); return false; }
+      if (e.ctrlKey && e.key === 's') { e.preventDefault(); return false; }
+    });
+    document.addEventListener('selectstart', e => { e.preventDefault(); return false; });
+    document.addEventListener('copy', e => { e.preventDefault(); return false; });
+    document.addEventListener('dragstart', e => { e.preventDefault(); return false; });
 
-    const { useState, useMemo, useEffect, useCallback, useRef } = React;
+    function detectDevTools() {
+      const threshold = 160;
+      const widthDiff = window.outerWidth - window.innerWidth;
+      const heightDiff = window.outerHeight - window.innerHeight;
+      if (widthDiff > threshold || heightDiff > threshold) {
+        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#151312;color:#c2542a;font-family:sans-serif;font-size:24px;text-align:center;padding:20px;">🔒 Доступ ограничен<br><span style="font-size:16px;color:#9a9188;">Закройте инструменты разработчика</span></div>';
+      }
+    }
+    setInterval(detectDevTools, 2000);
+
+    if (window.top !== window.self) {
+      window.top.location = window.self.location;
+    }
 
     // =============================================================
-    // 1️⃣ ДОПОЛНЕНИЕ: РАБОТА С TELEGRAM WEBAPP
+    // REACT КОД
+    // =============================================================
+    const { useState, useMemo, useEffect, useCallback } = React;
+
+    // =============================================================
+    // TELEGRAM WEBAPP
     // =============================================================
     function useTelegramWebApp() {
       useEffect(() => {
         const tg = window.Telegram?.WebApp;
         if (!tg) return;
-
         tg.expand();
         tg.BackButton.show();
         tg.BackButton.onClick(() => {
@@ -62,7 +86,6 @@
         tg.setHeaderColor('#151312');
         tg.setBackgroundColor('#151312');
         tg.ready();
-
         return () => {
           tg.BackButton.hide();
         };
@@ -70,7 +93,7 @@
     }
 
     // =============================================================
-    // 2️⃣ ИКОНКИ
+    // ИКОНКИ
     // =============================================================
     const Flame = () => <span style={{ fontSize: 16 }}>🔥</span>;
     const Plus = () => <span style={{ fontSize: 15, fontWeight: 700 }}>+</span>;
@@ -78,7 +101,7 @@
     const Droplet = () => <span style={{ fontSize: 12 }}>💧</span>;
 
     // =============================================================
-    // 3️⃣ ДАННЫЕ
+    // ДАННЫЕ
     // =============================================================
     const ACTIVITY = [
       { key: "sedentary", label: "Минимум движения", mult: 1.2, hint: "сидячая работа, почти нет спорта" },
@@ -126,9 +149,6 @@
       { label: "Бутылка 2 л", ml: 2000 },
     ];
 
-    // =============================================================
-    // БАЗА ПРОДУКТОВ (сокращённая — вставь свою полную)
-    // =============================================================
     const FOOD_DB = [
       { name: "Куриная грудка", kcal: 165, protein: 31, fat: 3.6, carbs: 0 },
       { name: "Куриное бедро", kcal: 209, protein: 18, fat: 15, carbs: 0 },
@@ -182,28 +202,47 @@
       { name: "Сахар", kcal: 387, protein: 0, fat: 0, carbs: 100 },
       { name: "Чизбургер", kcal: 250, protein: 13, fat: 12, carbs: 23, typicalGrams: 120 },
       { name: "Гамбургер", kcal: 235, protein: 12, fat: 9, carbs: 28, typicalGrams: 110 },
+      { name: "Чикенбургер", kcal: 280, protein: 14, fat: 14, carbs: 26, typicalGrams: 160 },
+      { name: "Двойной чизбургер", kcal: 270, protein: 16, fat: 15, carbs: 20, typicalGrams: 170 },
       { name: "Картофель фри", kcal: 312, protein: 3.4, fat: 15, carbs: 41, typicalGrams: 100 },
       { name: "Наггетсы куриные", kcal: 296, protein: 15, fat: 18, carbs: 17, typicalGrams: 100 },
+      { name: "Хот-дог", kcal: 290, protein: 10, fat: 18, carbs: 22, typicalGrams: 150 },
       { name: "Шаурма", kcal: 220, protein: 11, fat: 10, carbs: 20, typicalGrams: 300 },
+      { name: "Донер кебаб", kcal: 210, protein: 12, fat: 9, carbs: 20, typicalGrams: 300 },
       { name: "Пицца Маргарита (кусок)", kcal: 266, protein: 11, fat: 10, carbs: 33, typicalGrams: 100 },
+      { name: "Пицца Пепперони (кусок)", kcal: 298, protein: 13, fat: 15, carbs: 30, typicalGrams: 100 },
+      { name: "Ролл Филадельфия", kcal: 176, protein: 6, fat: 8, carbs: 20, typicalGrams: 200 },
+      { name: "Ролл Калифорния", kcal: 150, protein: 5, fat: 5, carbs: 20, typicalGrams: 200 },
       { name: "Кола", kcal: 42, protein: 0, fat: 0, carbs: 10.6, typicalGrams: 330 },
+      { name: "Сок апельсиновый", kcal: 45, protein: 0.7, fat: 0.2, carbs: 10, typicalGrams: 200 },
+      { name: "Пиво светлое", kcal: 43, protein: 0.5, fat: 0, carbs: 3.6, typicalGrams: 500 },
+      { name: "Кофе с молоком", kcal: 40, protein: 2, fat: 1.5, carbs: 4, typicalGrams: 250 },
+      { name: "Латте", kcal: 45, protein: 3, fat: 1.6, carbs: 4.5, typicalGrams: 300 },
       { name: "Шоколад молочный", kcal: 534, protein: 7.7, fat: 30, carbs: 58, typicalGrams: 50 },
+      { name: "Шоколад тёмный 70%", kcal: 546, protein: 7.8, fat: 31, carbs: 46, typicalGrams: 50 },
       { name: "Чипсы картофельные", kcal: 536, protein: 6.6, fat: 34, carbs: 53, typicalGrams: 50 },
+      { name: "Печенье овсяное", kcal: 437, protein: 6, fat: 18, carbs: 64, typicalGrams: 50 },
       { name: "Мороженое пломбир", kcal: 227, protein: 3.5, fat: 15, carbs: 20, typicalGrams: 100 },
+      { name: "Попкорн", kcal: 375, protein: 9, fat: 15, carbs: 58, typicalGrams: 50 },
       { name: "Майонез", kcal: 680, protein: 1, fat: 75, carbs: 2.6, typicalGrams: 20 },
       { name: "Кетчуп", kcal: 112, protein: 1.2, fat: 0.2, carbs: 27, typicalGrams: 20 },
+      { name: "Соевый соус", kcal: 53, protein: 8, fat: 0, carbs: 5, typicalGrams: 15 },
       { name: "Борщ", kcal: 49, protein: 2, fat: 2, carbs: 6, typicalGrams: 300 },
       { name: "Оливье", kcal: 190, protein: 5, fat: 15, carbs: 8, typicalGrams: 150 },
       { name: "Пельмени варёные", kcal: 220, protein: 11, fat: 9, carbs: 24, typicalGrams: 200 },
       { name: "Плов", kcal: 200, protein: 8, fat: 8, carbs: 25, typicalGrams: 250 },
+      { name: "Паста Болоньезе", kcal: 151, protein: 8, fat: 5, carbs: 18, typicalGrams: 300 },
+      { name: "Цезарь с курицей", kcal: 175, protein: 12, fat: 11, carbs: 6, typicalGrams: 250 },
+      { name: "Греческий салат", kcal: 105, protein: 3, fat: 8, carbs: 5, typicalGrams: 200 },
       { name: "Протеин сывороточный (порошок)", kcal: 380, protein: 75, fat: 5, carbs: 8, typicalGrams: 30 },
       { name: "Протеин изолят (порошок)", kcal: 370, protein: 85, fat: 1.5, carbs: 3, typicalGrams: 30 },
+      { name: "Казеин (порошок)", kcal: 360, protein: 75, fat: 2, carbs: 6, typicalGrams: 30 },
+      { name: "Протеиновый батончик", kcal: 380, protein: 30, fat: 12, carbs: 35, typicalGrams: 50 },
       { name: "Гейнер (порошок)", kcal: 380, protein: 20, fat: 3, carbs: 70, typicalGrams: 100 },
+      { name: "BCAA (порошок)", kcal: 6, protein: 1.5, fat: 0, carbs: 0, typicalGrams: 10 },
+      { name: "Креатин моногидрат", kcal: 0, protein: 0, fat: 0, carbs: 0, typicalGrams: 5 },
     ];
 
-    // =============================================================
-    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-    // =============================================================
     const uid = () => Math.random().toString(36).slice(2, 10);
     const dateStr = () => {
       const d = new Date();
@@ -213,290 +252,7 @@
     const waterKeyToday = () => `waterlog:${dateStr()}`;
 
     // =============================================================
-    // 4️⃣ КОМПОНЕНТ ДЛЯ ГРАФИКА ВЕСА
-    // =============================================================
-    function WeightTracker() {
-      const [weightData, setWeightData] = useState([]);
-      const [newWeight, setNewWeight] = useState("");
-      const chartRef = useRef(null);
-
-      useEffect(() => {
-        (async () => {
-          try {
-            const r = await window.storage.get("weight_history", false);
-            const data = r ? JSON.parse(r.value) : [];
-            setWeightData(data);
-          } catch {
-            setWeightData([]);
-          }
-        })();
-      }, []);
-
-      const saveWeightData = useCallback(async (data) => {
-        try {
-          await window.storage.set("weight_history", JSON.stringify(data), false);
-        } catch {}
-      }, []);
-
-      const addWeight = () => {
-        const weight = parseFloat(newWeight);
-        if (!weight || weight < 20 || weight > 300) {
-          alert("Введите корректный вес (20–300 кг)");
-          return;
-        }
-
-        const today = new Date();
-        const dateStr = today.toLocaleDateString('ru-RU', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        });
-
-        const newEntry = {
-          date: dateStr,
-          weight: weight,
-          timestamp: today.getTime()
-        };
-
-        const updated = [...weightData, newEntry];
-        updated.sort((a, b) => a.timestamp - b.timestamp);
-        setWeightData(updated);
-        saveWeightData(updated);
-        setNewWeight("");
-      };
-
-      const removeWeightEntry = (index) => {
-        const updated = weightData.filter((_, i) => i !== index);
-        setWeightData(updated);
-        saveWeightData(updated);
-      };
-
-      useEffect(() => {
-        if (weightData.length < 2) return;
-
-        const canvas = document.getElementById('weightChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-
-        if (chartRef.current) {
-          chartRef.current.destroy();
-        }
-
-        const labels = weightData.map(item => item.date);
-        const weights = weightData.map(item => item.weight);
-        const firstWeight = weights[0];
-        const lastWeight = weights[weights.length - 1];
-        const diff = lastWeight - firstWeight;
-
-        chartRef.current = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Вес (кг)',
-              data: weights,
-              borderColor: '#c2542a',
-              backgroundColor: 'rgba(194, 84, 42, 0.1)',
-              borderWidth: 3,
-              pointBackgroundColor: '#c2542a',
-              pointBorderColor: '#e9e2d6',
-              pointBorderWidth: 2,
-              pointRadius: 4,
-              fill: true,
-              tension: 0.3
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                labels: { color: '#e9e2d6' }
-              }
-            },
-            scales: {
-              x: {
-                grid: { color: 'rgba(50, 45, 41, 0.5)' },
-                ticks: { color: '#9a9188', maxTicksLimit: 7 }
-              },
-              y: {
-                grid: { color: 'rgba(50, 45, 41, 0.5)' },
-                ticks: { color: '#9a9188' }
-              }
-            }
-          }
-        });
-
-        return () => {
-          if (chartRef.current) {
-            chartRef.current.destroy();
-          }
-        };
-      }, [weightData]);
-
-      const styles = {
-        container: {
-          background: "#1c1a18",
-          border: "1px solid #322d29",
-          borderRadius: 10,
-          padding: 14,
-          marginTop: 12
-        },
-        title: {
-          fontSize: 10.5,
-          textTransform: "uppercase",
-          letterSpacing: 0.5,
-          color: "#9a9188",
-          marginBottom: 6
-        },
-        inputRow: {
-          display: "flex",
-          gap: 8,
-          marginBottom: 10
-        },
-        input: {
-          flex: 1,
-          background: "#211e1b",
-          border: "1px solid #322d29",
-          borderRadius: 7,
-          padding: "8px 10px",
-          color: "#e9e2d6",
-          fontSize: 12.5,
-          width: "100%"
-        },
-        button: {
-          background: "#c2542a",
-          border: "none",
-          borderRadius: 7,
-          padding: "8px 16px",
-          color: "#1c1a18",
-          fontWeight: 700,
-          cursor: "pointer"
-        },
-        stats: {
-          display: "flex",
-          gap: 12,
-          marginBottom: 10,
-          flexWrap: "wrap"
-        },
-        statBox: {
-          flex: 1,
-          background: "#211e1b",
-          border: "1px solid #322d29",
-          borderRadius: 7,
-          padding: "8px 12px",
-          textAlign: "center",
-          minWidth: 80
-        },
-        statValue: {
-          fontFamily: "'Oswald', sans-serif",
-          fontSize: 16,
-          fontWeight: 700,
-          color: "#c2542a"
-        },
-        statLabel: {
-          fontSize: 9,
-          color: "#9a9188",
-          marginTop: 2
-        },
-        chartWrapper: {
-          height: 200,
-          marginBottom: 10
-        },
-        list: {
-          display: "flex",
-          flexDirection: "column",
-          gap: 4
-        },
-        listItem: {
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          background: "#211e1b",
-          border: "1px solid #322d29",
-          borderRadius: 7,
-          padding: "6px 10px",
-          fontSize: 12
-        },
-        deleteBtn: {
-          background: "transparent",
-          border: "none",
-          color: "#9a9188",
-          cursor: "pointer",
-          fontSize: 14
-        }
-      };
-
-      const firstWeight = weightData.length > 0 ? weightData[0].weight : null;
-      const lastWeight = weightData.length > 0 ? weightData[weightData.length - 1].weight : null;
-      const diff = firstWeight && lastWeight ? lastWeight - firstWeight : 0;
-
-      return (
-        <div style={styles.container}>
-          <div style={styles.title}>📊 Отслеживание веса</div>
-
-          <div style={styles.inputRow}>
-            <input
-              type="number"
-              placeholder="Введите вес (кг)"
-              value={newWeight}
-              onChange={e => setNewWeight(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && addWeight()}
-              style={styles.input}
-              step="0.1"
-            />
-            <button style={styles.button} onClick={addWeight}>+ Добавить</button>
-          </div>
-
-          {weightData.length > 0 && (
-            <>
-              <div style={styles.stats}>
-                <div style={styles.statBox}>
-                  <div style={styles.statValue}>{firstWeight} кг</div>
-                  <div style={styles.statLabel}>Начальный вес</div>
-                </div>
-                <div style={styles.statBox}>
-                  <div style={styles.statValue}>{lastWeight} кг</div>
-                  <div style={styles.statLabel}>Текущий вес</div>
-                </div>
-                <div style={styles.statBox}>
-                  <div style={{ ...styles.statValue, color: diff >= 0 ? '#d9503f' : '#3fb7a6' }}>
-                    {diff >= 0 ? '+' : ''}{diff.toFixed(1)} кг {diff > 0 ? '📈' : diff < 0 ? '📉' : '➡️'}
-                  </div>
-                  <div style={styles.statLabel}>Изменение</div>
-                </div>
-              </div>
-
-              {weightData.length >= 2 && (
-                <div style={styles.chartWrapper}>
-                  <canvas id="weightChart"></canvas>
-                </div>
-              )}
-
-              <div style={styles.list}>
-                {weightData.slice().reverse().slice(0, 5).map((item, idx) => (
-                  <div key={idx} style={styles.listItem}>
-                    <span>{item.date}</span>
-                    <span style={{ fontWeight: 600, color: '#c2542a' }}>{item.weight} кг</span>
-                    <button style={styles.deleteBtn} onClick={() => removeWeightEntry(weightData.length - 1 - idx)}>✕</button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {weightData.length === 0 && (
-            <div style={{ fontSize: 10, color: '#9a9188', textAlign: 'center', padding: 20 }}>
-              Пока нет записей. Добавьте свой вес!
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // =============================================================
-    // 5️⃣ ГЛАВНЫЙ КОМПОНЕНТ CALORIECALC
+    // ГЛАВНЫЙ КОМПОНЕНТ
     // =============================================================
     function CalorieCalc() {
       useTelegramWebApp();
@@ -526,7 +282,6 @@
       const foodKey = foodKeyToday();
       const waterKey = waterKeyToday();
 
-      // Загрузка данных
       useEffect(() => {
         (async () => {
           try {
@@ -568,19 +323,13 @@
         };
       }, [selectedFood, grams]);
 
-      function pickSuggestion(food) {
-        setSelectedFood(food);
-        setFoodName(food.name);
-        setGrams(food.typicalGrams || 100);
-        setShowSuggestions(false);
-      }
-
       function pickFromRecommendation(name) {
         const dbFood = FOOD_DB.find((f) => f.name === name);
-        if (dbFood) pickSuggestion(dbFood);
-        else {
-          setFoodName(name);
-          setSelectedFood(null);
+        if (dbFood) {
+          setSelectedFood(dbFood);
+          setFoodName(dbFood.name);
+          setGrams(dbFood.typicalGrams || 100);
+          setShowSuggestions(false);
         }
       }
 
@@ -641,7 +390,6 @@
         persistWater(next);
       }
 
-      // Расчёты
       const result = useMemo(() => {
         const a = Number(age) || 0;
         const w = Number(weight) || 0;
@@ -673,14 +421,35 @@
       const waterPct = Math.min(100, (drunk / (result.waterTarget || 1)) * 100);
       const waterDone = drunk >= result.waterTarget;
 
-      // === СТИЛИ ===
+      // =============================================================
+      // СТИЛИ (исправленные — ничего не вылезает)
+      // =============================================================
       const styles = {
-        app: { background: "#151312", color: "#e9e2d6", padding: 14, borderRadius: 12, border: "1px solid #322d29", maxWidth: 640, width: "calc(100% - 16px)", margin: "0 auto" },
+        app: {
+          background: "#151312",
+          color: "#e9e2d6",
+          padding: 14,
+          borderRadius: 12,
+          border: "1px solid #322d29",
+          maxWidth: 640,
+          width: "100%",
+          margin: "0 auto",
+          boxSizing: "border-box",
+          overflowX: "hidden",
+        },
         header: { display: "flex", alignItems: "center", gap: 9, marginBottom: 16 },
         brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: 0.5 },
         sub: { fontSize: 11, color: "#9a9188" },
         grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-        card: { background: "#1c1a18", border: "1px solid #322d29", borderRadius: 10, padding: 14 },
+        card: {
+          background: "#1c1a18",
+          border: "1px solid #322d29",
+          borderRadius: 10,
+          padding: 14,
+          width: "100%",
+          boxSizing: "border-box",
+          overflow: "hidden",
+        },
         rowLabel: { fontSize: 10.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "10px 0 6px" },
         segRow: { display: "flex", gap: 6 },
         seg: { flex: 1, background: "#211e1b", border: "1px solid transparent", color: "#9a9188", borderRadius: 7, padding: "7px 6px", fontSize: 11.5, cursor: "pointer" },
@@ -712,7 +481,17 @@
         macroBarFill: { height: "100%", borderRadius: 3, transition: "width 0.4s ease" },
         macroValue: { fontSize: 12.5, fontWeight: 700 },
         macroLabel: { fontSize: 10, color: "#9a9188" },
-        foodNameInput: { width: "100%", background: "#211e1b", border: "1px solid #322d29", color: "#e9e2d6", borderRadius: 7, padding: "8px 10px", fontSize: 12.5, marginBottom: 6 },
+        foodNameInput: {
+          width: "100%",
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          color: "#e9e2d6",
+          borderRadius: 7,
+          padding: "8px 10px",
+          fontSize: 12.5,
+          marginBottom: 6,
+          boxSizing: "border-box",
+        },
         foodKcalInput: { width: 80, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 7, padding: "8px 10px", fontSize: 12.5, textAlign: "center" },
         addFoodBtn: { width: 36, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 7, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
         macroInputRow: { display: "flex", gap: 6, marginBottom: 10, alignItems: "flex-end", flexWrap: "wrap" },
@@ -720,7 +499,19 @@
         miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "7px 6px", fontSize: 12.5, textAlign: "center", fontWeight: 600, width: "100%" },
         miniFieldLabel: { fontSize: 8.5, color: "#9a9188", textAlign: "center" },
         foodList: { display: "flex", flexDirection: "column", gap: 5 },
-        foodRow: { display: "flex", alignItems: "center", gap: 8, background: "#211e1b", border: "1px solid #322d29", borderRadius: 7, padding: "6px 10px", fontSize: 12 },
+        foodRow: {
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          borderRadius: 7,
+          padding: "6px 10px",
+          fontSize: 12,
+          width: "100%",
+          boxSizing: "border-box",
+          overflow: "hidden",
+        },
         foodKcalTag: { color: "#3fb7a6", fontWeight: 600, textAlign: "right", flexShrink: 0 },
         macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 10 },
         ghostDelete: { background: "transparent", border: "none", color: "#9a9188", cursor: "pointer" },
@@ -733,12 +524,28 @@
         suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 8, overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.4)" },
         suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "8px 10px", fontSize: 12, cursor: "pointer", textAlign: "left" },
         suggestMeta: { fontSize: 10.5, color: "#9a9188" },
-        recoChips: { display: "flex", flexWrap: "wrap", gap: 6 },
-        recoChip: { background: "#211e1b", border: "1px solid #322d29", color: "#e9e2d6", borderRadius: 999, padding: "6px 12px", fontSize: 11.5, cursor: "pointer" },
+        recoChips: { display: "flex", flexWrap: "wrap", gap: 6, width: "100%" },
+        recoChip: {
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          color: "#e9e2d6",
+          borderRadius: 999,
+          padding: "6px 12px",
+          fontSize: 11.5,
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+          maxWidth: "100%",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        },
       };
 
+      // =============================================================
+      // ВЕРСТКА (порядок: Рекомендации → Дневник → Вода)
+      // =============================================================
       return (
         <div style={styles.app}>
+          {/* Шапка */}
           <div style={styles.header}>
             <div style={{ width: 30, height: 30, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
@@ -749,7 +556,9 @@
             </div>
           </div>
 
+          {/* Основная сетка */}
           <div style={styles.grid}>
+            {/* Левая колонка — настройки */}
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
@@ -804,6 +613,7 @@
               </div>
             </div>
 
+            {/* Правая колонка — кольца */}
             <div style={styles.card}>
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
@@ -863,7 +673,9 @@
             </div>
           </div>
 
-          {/* Рекомендации */}
+          {/* =============================================================
+              БЛОК 1: РЕКОМЕНДАЦИИ
+              ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
             <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 10 }}>{RECOMMENDATIONS[goal].note}</p>
@@ -876,20 +688,42 @@
             </div>
           </div>
 
-          {/* ГРАФИК ВЕСА */}
-          <WeightTracker />
-
-          {/* Дневник питания */}
+          {/* =============================================================
+              БЛОК 2: ДНЕВНИК ПИТАНИЯ
+              ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>Дневник питания — сегодня</div>
             <div style={{ position: "relative" }}>
-              <input style={styles.foodNameInput} placeholder="начни вводить продукт (например, куриная)" value={foodName} onChange={e => { setFoodName(e.target.value); setShowSuggestions(true); if (selectedFood) setSelectedFood(null); }} onFocus={() => setShowSuggestions(true)} onBlur={() => setTimeout(() => setShowSuggestions(false), 120)} onKeyDown={e => e.key === "Enter" && addFood()} />
+              <input
+                style={styles.foodNameInput}
+                placeholder="начни вводить продукт (например, куриная)"
+                value={foodName}
+                onChange={e => {
+                  setFoodName(e.target.value);
+                  setShowSuggestions(true);
+                  if (selectedFood) setSelectedFood(null);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 120)}
+                onKeyDown={e => e.key === "Enter" && addFood()}
+              />
               {showSuggestions && suggestions.length > 0 && (
                 <div style={styles.suggestBox}>
                   {suggestions.map(f => (
-                    <button key={f.name} style={styles.suggestItem} onMouseDown={() => pickSuggestion(f)}>
+                    <button
+                      key={f.name}
+                      style={styles.suggestItem}
+                      onMouseDown={() => {
+                        setSelectedFood(f);
+                        setFoodName(f.name);
+                        setGrams(f.typicalGrams || 100);
+                        setShowSuggestions(false);
+                      }}
+                    >
                       <span>{f.name}</span>
-                      <span style={styles.suggestMeta}>{f.kcal} ккал/100g{f.typicalGrams ? ` · порция ~${f.typicalGrams}г` : ""}</span>
+                      <span style={styles.suggestMeta}>
+                        {f.kcal} ккал/100г{f.typicalGrams ? ` · порция ~${f.typicalGrams}г` : ""}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -899,42 +733,89 @@
             {selectedFood ? (
               <div style={styles.dbRow}>
                 <div style={styles.miniField}>
-                  <input type="number" value={grams} onChange={e => setGrams(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
+                  <input
+                    type="number"
+                    value={grams}
+                    onChange={e => setGrams(e.target.value)}
+                    style={{ ...styles.miniFieldInput, color: "#3fb7a6" }}
+                  />
                   <span style={styles.miniFieldLabel}>граммы</span>
                 </div>
                 <div style={styles.dbPreview}>
-                  {computedFromDb && <span style={{ color: "#c2542a", fontWeight: 700 }}>{computedFromDb.kcal} ккал <span style={{ color: "#9a9188", fontWeight: 400 }}>Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}</span></span>}
+                  {computedFromDb && (
+                    <span style={{ color: "#c2542a", fontWeight: 700 }}>
+                      {computedFromDb.kcal} ккал
+                      <span style={{ color: "#9a9188", fontWeight: 400 }}>
+                        {" "}Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}
+                      </span>
+                    </span>
+                  )}
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
             ) : (
               <div style={styles.macroInputRow}>
                 <div style={styles.miniField}>
-                  <input type="number" placeholder="0" value={foodKcal} onChange={e => setFoodKcal(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={foodKcal}
+                    onChange={e => setFoodKcal(e.target.value)}
+                    style={{ ...styles.miniFieldInput, color: "#c2542a" }}
+                  />
                   <span style={styles.miniFieldLabel}>ккал</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input type="number" placeholder="0" value={foodProtein} onChange={e => setFoodProtein(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={foodProtein}
+                    onChange={e => setFoodProtein(e.target.value)}
+                    style={{ ...styles.miniFieldInput, color: "#3fb7a6" }}
+                  />
                   <span style={styles.miniFieldLabel}>белки г</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input type="number" placeholder="0" value={foodFat} onChange={e => setFoodFat(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={foodFat}
+                    onChange={e => setFoodFat(e.target.value)}
+                    style={{ ...styles.miniFieldInput, color: "#c2542a" }}
+                  />
                   <span style={styles.miniFieldLabel}>жиры г</span>
                 </div>
                 <div style={styles.miniField}>
-                  <input type="number" placeholder="0" value={foodCarbs} onChange={e => setFoodCarbs(e.target.value)} style={{ ...styles.miniFieldInput, color: "#9a9188" }} />
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={foodCarbs}
+                    onChange={e => setFoodCarbs(e.target.value)}
+                    style={{ ...styles.miniFieldInput, color: "#9a9188" }}
+                  />
                   <span style={styles.miniFieldLabel}>углев г</span>
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
             )}
 
-            {!logLoaded ? <div style={styles.footnote}>Загружаю...</div> : !log.length ? <div style={styles.footnote}>Пока пусто — добавь первый приём пищи выше.</div> : (
+            {!logLoaded ? (
+              <div style={styles.footnote}>Загружаю...</div>
+            ) : !log.length ? (
+              <div style={styles.footnote}>Пока пусто — добавь первый приём пищи выше.</div>
+            ) : (
               <div style={styles.foodList}>
                 {log.map(f => (
                   <div key={f.id} style={styles.foodRow}>
                     <span style={{ flex: 1 }}>{f.name}</span>
-                    <span style={styles.foodKcalTag}>{f.kcal} ккал{(f.protein || f.fat || f.carbs) && <span style={styles.macroTag}> Б{f.protein || 0}/Ж{f.fat || 0}/У{f.carbs || 0}</span>}</span>
+                    <span style={styles.foodKcalTag}>
+                      {f.kcal} ккал
+                      {(f.protein || f.fat || f.carbs) && (
+                        <span style={styles.macroTag}>
+                          {" "}Б{f.protein || 0}/Ж{f.fat || 0}/У{f.carbs || 0}
+                        </span>
+                      )}
+                    </span>
                     <button style={styles.ghostDelete} onClick={() => removeFood(f.id)}><Trash2 /></button>
                   </div>
                 ))}
@@ -942,19 +823,35 @@
             )}
           </div>
 
-          {/* Вода */}
+          {/* =============================================================
+              БЛОК 3: ВОДА
+              ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
             <div style={styles.waterQuickRow}>
               {WATER_QUICK.map(q => (
-                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>+ {q.label} ({q.ml} мл)</button>
+                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>
+                  + {q.label} ({q.ml} мл)
+                </button>
               ))}
             </div>
             <div style={styles.foodInputRow}>
-              <input style={styles.foodKcalInput} placeholder="мл" type="number" value={customMl} onChange={e => setCustomMl(e.target.value)} onKeyDown={e => e.key === "Enter" && addCustomWater()} />
+              <input
+                style={styles.foodKcalInput}
+                placeholder="мл"
+                type="number"
+                value={customMl}
+                onChange={e => setCustomMl(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && addCustomWater()}
+              />
               <button style={styles.addFoodBtn} onClick={addCustomWater}><Plus /></button>
             </div>
-            {!waterLoaded ? <div style={styles.footnote}>Загружаю…</div> : !water.length ? <div style={styles.footnote}>Пока пусто — отметь первый стакан воды.</div> : (
+
+            {!waterLoaded ? (
+              <div style={styles.footnote}>Загружаю…</div>
+            ) : !water.length ? (
+              <div style={styles.footnote}>Пока пусто — отметь первый стакан воды.</div>
+            ) : (
               <div style={styles.foodList}>
                 {water.map(w => (
                   <div key={w.id} style={styles.foodRow}>
@@ -965,7 +862,11 @@
                 ))}
               </div>
             )}
-            <p style={styles.footnote}>Дневники видны только тебе и сбрасываются на новый день. Расчёты ориентировочные — для точной корректировки подключи консультацию с тренером.</p>
+
+            <p style={styles.footnote}>
+              Дневники видны только тебе и сбрасываются на новый день. Расчёты ориентировочные —
+              для точной корректировки подключи консультацию с тренером.
+            </p>
           </div>
         </div>
       );
@@ -974,7 +875,6 @@
     // =============================================================
     // STORAGE И ЗАПУСК
     // =============================================================
-
     window.storage = {
       get: (key, sync) => {
         try {
