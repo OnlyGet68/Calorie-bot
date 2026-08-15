@@ -451,7 +451,7 @@
       const waterDone = drunk >= result.waterTarget;
 
       // =============================================================
-      // СТИЛИ (исправленные)
+      // СТИЛИ
       // =============================================================
       const styles = {
         app: {
@@ -611,9 +611,6 @@
           width: "100%",
         },
         weightAddBtn: {
-          width: "auto",
-          padding: "0 16px",
-          flexShrink: 0,
           background: "#c2542a",
           border: "none",
           borderRadius: 7,
@@ -622,21 +619,17 @@
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          fontSize: 12,
-          fontWeight: 600,
-          height: 38,
           whiteSpace: "nowrap",
-        },
-        weightEmpty: {
-          fontSize: 10,
-          color: "#9a9188",
-          lineHeight: 1.5,
-          marginTop: 4,
+          padding: "0 16px",
+          height: "38px",
+          fontSize: 12.5,
+          fontWeight: 600,
         },
       };
 
       return (
         <div style={styles.app}>
+          {/* Шапка */}
           <div style={styles.header}>
             <div style={{ width: 30, height: 30, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
@@ -647,7 +640,9 @@
             </div>
           </div>
 
+          {/* Основная сетка */}
           <div style={styles.grid}>
+            {/* Левая колонка */}
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
@@ -702,6 +697,7 @@
               </div>
             </div>
 
+            {/* Правая колонка */}
             <div style={styles.card}>
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
@@ -761,7 +757,9 @@
             </div>
           </div>
 
-          {/* Рекомендации */}
+          {/* =============================================================
+              БЛОК: РЕКОМЕНДАЦИИ
+          ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
             <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 10 }}>{RECOMMENDATIONS[goal].note}</p>
@@ -774,7 +772,9 @@
             </div>
           </div>
 
-          {/* Методика управления весом */}
+          {/* =============================================================
+              БЛОК: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ (НОВЫЙ!)
+          ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>Методика управления весом</div>
             <div style={styles.weightInputRow}>
@@ -783,8 +783,8 @@
                 placeholder="Введите вес (кг)"
                 style={styles.weightInput}
                 value={weightInput}
-                onChange={e => setWeightInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && addWeightRecord()}
+                onChange={(e) => setWeightInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && addWeightRecord()}
               />
               <button style={styles.weightAddBtn} onClick={addWeightRecord}>
                 + Добавить
@@ -794,7 +794,7 @@
             {!weightLoaded ? (
               <div style={styles.footnote}>Загружаю...</div>
             ) : !weightRecords.length ? (
-              <div style={styles.weightEmpty}>Пока нет записей. Добавьте свой вес!</div>
+              <div style={styles.footnote}>Пока нет записей. Добавьте свой вес!</div>
             ) : (
               <div style={styles.foodList}>
                 {weightRecords.map((record) => (
@@ -810,7 +810,9 @@
             )}
           </div>
 
-          {/* Дневник питания */}
+          {/* =============================================================
+              БЛОК: ДНЕВНИК ПИТАНИЯ
+          ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}>Дневник питания — сегодня</div>
             <div style={{ position: "relative" }}>
@@ -943,7 +945,9 @@
             )}
           </div>
 
-          {/* Вода */}
+          {/* =============================================================
+              БЛОК: ВОДА
+          ============================================================= */}
           <div style={{ ...styles.card, marginTop: 12 }}>
             <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
             <div style={styles.waterQuickRow}>
