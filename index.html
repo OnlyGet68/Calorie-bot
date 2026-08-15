@@ -84,57 +84,57 @@
     // =============================================================
     // ИКОНКИ
     // =============================================================
-    const Flame = () => <span style={{ fontSize: 14 }}>🔥</span>;
-    const Plus = () => <span style={{ fontSize: 13, fontWeight: 700 }}>+</span>;
-    const Trash2 = () => <span style={{ fontSize: 12 }}>✕</span>;
-    const Droplet = () => <span style={{ fontSize: 11 }}>💧</span>;
+    const Flame = () => <span style={{ fontSize: 13 }}>🔥</span>;
+    const Plus = () => <span style={{ fontSize: 12, fontWeight: 700 }}>+</span>;
+    const Trash2 = () => <span style={{ fontSize: 11 }}>✕</span>;
+    const Droplet = () => <span style={{ fontSize: 10 }}>💧</span>;
 
     // =============================================================
-    // ДАННЫЕ
+    // ДАННЫЕ (максимально короткие)
     // =============================================================
     const ACTIVITY = [
-      { key: "sedentary", label: "Минимум движения", mult: 1.2, hint: "сидячая работа" },
-      { key: "light", label: "Лёгкая активность", mult: 1.375, hint: "1–3 раза" },
-      { key: "moderate", label: "Средняя активность", mult: 1.55, hint: "3–5 раз" },
-      { key: "high", label: "Высокая активность", mult: 1.725, hint: "6–7 раз" },
-      { key: "extreme", label: "Физ. работа + спорт", mult: 1.9, hint: "тяжёлый труд" },
+      { key: "sedentary", label: "Минимум", mult: 1.2 },
+      { key: "light", label: "Лёгкая", mult: 1.375 },
+      { key: "moderate", label: "Средняя", mult: 1.55 },
+      { key: "high", label: "Высокая", mult: 1.725 },
+      { key: "extreme", label: "Макс.", mult: 1.9 },
     ];
 
     const GOALS = [
       { key: "dry", label: "Сушка", delta: -0.25 },
-      { key: "lose", label: "Снижение веса", delta: -0.2 },
+      { key: "lose", label: "Снижение", delta: -0.2 },
       { key: "maintain", label: "Удержание", delta: 0 },
-      { key: "gain", label: "Набор массы", delta: 0.12 },
+      { key: "gain", label: "Набор", delta: 0.12 },
     ];
 
     const RECOMMENDATIONS = {
       dry: {
-        title: "На сушке",
-        note: "Упор на белок, минимум углеводов.",
-        items: ["Куриная грудка", "Яичный белок", "Творог 0%", "Тунец", "Креветки", "Брокколи", "Шпинат"],
+        title: "Сушка",
+        note: "Белок, минимум углеводов.",
+        items: ["Куриная грудка", "Яичный белок", "Творог 0%", "Тунец", "Креветки", "Брокколи"],
       },
       lose: {
-        title: "Для снижения веса",
+        title: "Снижение веса",
         note: "Баланс белка и клетчатки.",
-        items: ["Куриная грудка", "Творог 5%", "Рис варёный", "Овсянка", "Брокколи", "Помидор", "Яблоко"],
+        items: ["Куриная грудка", "Творог 5%", "Рис", "Овсянка", "Брокколи", "Помидор", "Яблоко"],
       },
       maintain: {
-        title: "Для удержания веса",
+        title: "Удержание",
         note: "Разнообразный рацион.",
-        items: ["Куриное бедро", "Лосось", "Яйцо", "Гречка", "Картофель", "Банан", "Миндаль"],
+        items: ["Куриное бедро", "Лосось", "Яйцо", "Гречка", "Картофель", "Банан"],
       },
       gain: {
-        title: "Для набора массы",
-        note: "Больше калорий, крупы, орехи.",
-        items: ["Говядина", "Лосось", "Яйцо", "Рис", "Овсянка", "Арахисовая паста", "Банан"],
+        title: "Набор массы",
+        note: "Больше калорий, крупы.",
+        items: ["Говядина", "Лосось", "Яйцо", "Рис", "Овсянка", "Арахисовая паста"],
       },
     };
 
     const WATER_QUICK = [
       { label: "Стакан", ml: 250 },
-      { label: "0.5 л", ml: 500 },
-      { label: "1 л", ml: 1000 },
-      { label: "1.5 л", ml: 1500 },
+      { label: "0.5л", ml: 500 },
+      { label: "1л", ml: 1000 },
+      { label: "1.5л", ml: 1500 },
     ];
 
     const FOOD_DB = [
@@ -154,8 +154,6 @@
       { name: "Банан", kcal: 89, protein: 1.1, fat: 0.3, carbs: 23 },
       { name: "Миндаль", kcal: 579, protein: 21, fat: 50, carbs: 22 },
       { name: "Оливковое масло", kcal: 884, protein: 0, fat: 100, carbs: 0 },
-      { name: "Шоколад молочный", kcal: 534, protein: 7.7, fat: 30, carbs: 58 },
-      { name: "Протеин (порошок)", kcal: 380, protein: 75, fat: 5, carbs: 8 },
     ];
 
     const uid = () => Math.random().toString(36).slice(2, 10);
@@ -369,14 +367,14 @@
       const waterDone = drunk >= result.waterTarget;
 
       // =============================================================
-      // СТИЛИ
+      // СТИЛИ — МАКСИМАЛЬНАЯ ШИРИНА
       // =============================================================
       const styles = {
         app: {
           background: "#151312",
           color: "#e9e2d6",
-          padding: 10,
-          borderRadius: 12,
+          padding: 6,
+          borderRadius: 8,
           border: "1px solid #322d29",
           maxWidth: "100%",
           width: "100%",
@@ -384,158 +382,158 @@
           boxSizing: "border-box",
           overflowX: "hidden",
         },
-        header: { display: "flex", alignItems: "center", gap: 9, marginBottom: 12 },
-        brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 14, letterSpacing: 0.5 },
-        sub: { fontSize: 11, color: "#9a9188" },
-        grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
+        header: { display: "flex", alignItems: "center", gap: 6, marginBottom: 8 },
+        brand: { fontFamily: "'Oswald', sans-serif", fontWeight: 600, fontSize: 12, letterSpacing: 0.3 },
+        sub: { fontSize: 9, color: "#9a9188" },
+        grid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 },
         card: {
           background: "#1c1a18",
           border: "1px solid #322d29",
-          borderRadius: 10,
-          padding: 12,
+          borderRadius: 8,
+          padding: 8,
           width: "100%",
           boxSizing: "border-box",
           overflow: "hidden",
         },
-        rowLabel: { fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", margin: "8px 0 4px" },
-        segRow: { display: "flex", gap: 4 },
+        rowLabel: { fontSize: 8.5, textTransform: "uppercase", letterSpacing: 0.3, color: "#9a9188", margin: "4px 0 2px" },
+        segRow: { display: "flex", gap: 3 },
         seg: {
           flex: 1,
           background: "#211e1b",
           border: "1px solid transparent",
           color: "#9a9188",
-          borderRadius: 6,
-          padding: "6px 4px",
-          fontSize: 11,
+          borderRadius: 5,
+          padding: "4px 3px",
+          fontSize: 9.5,
           cursor: "pointer",
           textAlign: "center",
-          minWidth: "50px",
+          minWidth: "40px",
         },
         segActive: { background: "#c2542a", color: "#1c1a18", fontWeight: 700 },
-        fieldsRow: { display: "flex", gap: 6, margin: "8px 0 2px" },
-        field: { flex: 1, display: "flex", flexDirection: "column", gap: 3 },
-        fieldLabel: { fontSize: 9.5, color: "#9a9188" },
+        fieldsRow: { display: "flex", gap: 4, margin: "4px 0 2px" },
+        field: { flex: 1, display: "flex", flexDirection: "column", gap: 2 },
+        fieldLabel: { fontSize: 8, color: "#9a9188" },
         fieldInputWrap: {
           display: "flex",
           alignItems: "center",
           background: "#211e1b",
           border: "1px solid #322d29",
-          borderRadius: 6,
-          padding: "4px 8px",
+          borderRadius: 5,
+          padding: "3px 6px",
         },
         fieldInput: {
           background: "transparent",
           border: "none",
           color: "#3fb7a6",
           width: "100%",
-          fontSize: 13,
+          fontSize: 11,
           fontWeight: 600,
-          minWidth: "35px",
+          minWidth: "30px",
         },
-        fieldUnit: { fontSize: 9, color: "#9a9188" },
-        optRow: { display: "flex", alignItems: "center", gap: 6, background: "#211e1b", border: "1px solid transparent", borderRadius: 6, padding: "5px 8px", cursor: "pointer" },
+        fieldUnit: { fontSize: 8, color: "#9a9188" },
+        optRow: { display: "flex", alignItems: "center", gap: 4, background: "#211e1b", border: "1px solid transparent", borderRadius: 5, padding: "3px 6px", cursor: "pointer" },
         optRowActive: { borderColor: "#c2542a", background: "#241d18" },
-        optDot: (active) => ({ width: 7, height: 7, borderRadius: "50%", background: active ? "#c2542a" : "#322d29" }),
-        optLabel: { fontSize: 11, fontWeight: 600 },
-        optHint: { fontSize: 9, color: "#9a9188" },
-        ringsRow: { display: "flex", justifyContent: "center", gap: 8, padding: "2px 0 6px" },
-        ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 2 },
-        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 20, fontWeight: 700, fill: "#e9e2d6" },
-        ringUnit: { fontSize: 8, fill: "#9a9188" },
-        ringCaption: { fontSize: 9, fontWeight: 700 },
-        statRow: { display: "flex", gap: 6, marginBottom: 10 },
-        statBox: { flex: 1, background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, padding: "6px 8px", textAlign: "center" },
-        statValue: { fontFamily: "'Oswald', sans-serif", fontSize: 14, fontWeight: 700, color: "#3fb7a6" },
-        statLabel: { fontSize: 9, color: "#9a9188" },
-        macroTitle: { fontSize: 9.5, textTransform: "uppercase", letterSpacing: 0.5, color: "#9a9188", marginBottom: 4 },
-        macroRow: { display: "flex", gap: 6 },
-        macroBox: { flex: 1, display: "flex", flexDirection: "column", gap: 3 },
-        macroBarTrack: { height: 4, borderRadius: 2, background: "#211e1b", overflow: "hidden" },
+        optDot: (active) => ({ width: 6, height: 6, borderRadius: "50%", background: active ? "#c2542a" : "#322d29" }),
+        optLabel: { fontSize: 9.5, fontWeight: 600 },
+        optHint: { fontSize: 8, color: "#9a9188" },
+        ringsRow: { display: "flex", justifyContent: "center", gap: 6, padding: "2px 0 4px" },
+        ringCol: { display: "flex", flexDirection: "column", alignItems: "center", gap: 1 },
+        ringNumber: { fontFamily: "'Oswald', sans-serif", fontSize: 17, fontWeight: 700, fill: "#e9e2d6" },
+        ringUnit: { fontSize: 7, fill: "#9a9188" },
+        ringCaption: { fontSize: 8, fontWeight: 700 },
+        statRow: { display: "flex", gap: 4, marginBottom: 6 },
+        statBox: { flex: 1, background: "#211e1b", border: "1px solid #322d29", borderRadius: 5, padding: "4px 6px", textAlign: "center" },
+        statValue: { fontFamily: "'Oswald', sans-serif", fontSize: 12, fontWeight: 700, color: "#3fb7a6" },
+        statLabel: { fontSize: 8, color: "#9a9188" },
+        macroTitle: { fontSize: 8, textTransform: "uppercase", letterSpacing: 0.3, color: "#9a9188", marginBottom: 3 },
+        macroRow: { display: "flex", gap: 4 },
+        macroBox: { flex: 1, display: "flex", flexDirection: "column", gap: 2 },
+        macroBarTrack: { height: 3, borderRadius: 2, background: "#211e1b", overflow: "hidden" },
         macroBarFill: { height: "100%", borderRadius: 2, transition: "width 0.4s ease" },
-        macroValue: { fontSize: 11, fontWeight: 700 },
-        macroLabel: { fontSize: 9, color: "#9a9188" },
+        macroValue: { fontSize: 9.5, fontWeight: 700 },
+        macroLabel: { fontSize: 7.5, color: "#9a9188" },
         foodNameInput: {
           width: "100%",
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
-          borderRadius: 6,
-          padding: "6px 8px",
-          fontSize: 11.5,
-          marginBottom: 4,
+          borderRadius: 5,
+          padding: "4px 6px",
+          fontSize: 10,
+          marginBottom: 3,
           boxSizing: "border-box",
         },
-        foodKcalInput: { width: 70, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 6, padding: "6px 8px", fontSize: 11.5, textAlign: "center" },
-        addFoodBtn: { width: 32, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 6, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" },
-        macroInputRow: { display: "flex", gap: 4, marginBottom: 6, alignItems: "flex-end", flexWrap: "wrap" },
-        miniField: { flex: 1, minWidth: 45, display: "flex", flexDirection: "column", gap: 2 },
-        miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, padding: "5px 4px", fontSize: 11, textAlign: "center", fontWeight: 600, width: "100%" },
-        miniFieldLabel: { fontSize: 8, color: "#9a9188", textAlign: "center" },
-        foodList: { display: "flex", flexDirection: "column", gap: 4 },
+        foodKcalInput: { width: 60, background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 5, padding: "4px 6px", fontSize: 10, textAlign: "center" },
+        addFoodBtn: { width: 28, flexShrink: 0, background: "#c2542a", border: "none", borderRadius: 5, color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12 },
+        macroInputRow: { display: "flex", gap: 3, marginBottom: 4, alignItems: "flex-end", flexWrap: "wrap" },
+        miniField: { flex: 1, minWidth: 35, display: "flex", flexDirection: "column", gap: 1 },
+        miniFieldInput: { background: "#211e1b", border: "1px solid #322d29", borderRadius: 5, padding: "3px 3px", fontSize: 9.5, textAlign: "center", fontWeight: 600, width: "100%" },
+        miniFieldLabel: { fontSize: 7, color: "#9a9188", textAlign: "center" },
+        foodList: { display: "flex", flexDirection: "column", gap: 3 },
         foodRow: {
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 4,
           background: "#211e1b",
           border: "1px solid #322d29",
-          borderRadius: 6,
-          padding: "4px 8px",
-          fontSize: 11,
+          borderRadius: 5,
+          padding: "3px 6px",
+          fontSize: 9.5,
           width: "100%",
           boxSizing: "border-box",
           overflow: "hidden",
         },
-        foodKcalTag: { color: "#3fb7a6", fontWeight: 600, textAlign: "right", flexShrink: 0 },
-        macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 9 },
-        ghostDelete: { background: "transparent", border: "none", color: "#9a9188", cursor: "pointer" },
-        waterQuickRow: { display: "flex", gap: 4, marginBottom: 6, flexWrap: "wrap" },
-        waterQuickBtn: { background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 6, padding: "4px 8px", fontSize: 10.5, cursor: "pointer", fontWeight: 600 },
-        footnote: { fontSize: 9, color: "#9a9188", lineHeight: 1.4, marginTop: 6 },
-        foodInputRow: { display: "flex", gap: 4, marginBottom: 6 },
-        dbRow: { display: "flex", gap: 6, alignItems: "flex-end", marginBottom: 4 },
-        dbPreview: { flex: 1, fontSize: 11, paddingBottom: 4 },
-        suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 6, overflow: "hidden", boxShadow: "0 6px 16px rgba(0,0,0,0.4)" },
-        suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "6px 8px", fontSize: 11, cursor: "pointer", textAlign: "left" },
-        suggestMeta: { fontSize: 9.5, color: "#9a9188" },
-        recoChips: { display: "flex", flexWrap: "wrap", gap: 4, width: "100%" },
+        foodKcalTag: { color: "#3fb7a6", fontWeight: 600, textAlign: "right", flexShrink: 0, fontSize: 9 },
+        macroTag: { color: "#9a9188", fontWeight: 400, fontSize: 8 },
+        ghostDelete: { background: "transparent", border: "none", color: "#9a9188", cursor: "pointer", fontSize: 11 },
+        waterQuickRow: { display: "flex", gap: 3, marginBottom: 4, flexWrap: "wrap" },
+        waterQuickBtn: { background: "#211e1b", border: "1px solid #322d29", color: "#3fb7a6", borderRadius: 5, padding: "3px 6px", fontSize: 9, cursor: "pointer", fontWeight: 600 },
+        footnote: { fontSize: 8, color: "#9a9188", lineHeight: 1.3, marginTop: 4 },
+        foodInputRow: { display: "flex", gap: 3, marginBottom: 4 },
+        dbRow: { display: "flex", gap: 4, alignItems: "flex-end", marginBottom: 3 },
+        dbPreview: { flex: 1, fontSize: 9.5, paddingBottom: 3 },
+        suggestBox: { position: "absolute", top: "100%", left: 0, right: 0, zIndex: 5, marginTop: 2, background: "#211e1b", border: "1px solid #322d29", borderRadius: 5, overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.5)" },
+        suggestItem: { display: "flex", justifyContent: "space-between", width: "100%", background: "transparent", border: "none", borderBottom: "1px solid #322d29", color: "#e9e2d6", padding: "4px 6px", fontSize: 9.5, cursor: "pointer", textAlign: "left" },
+        suggestMeta: { fontSize: 8.5, color: "#9a9188" },
+        recoChips: { display: "flex", flexWrap: "wrap", gap: 3, width: "100%" },
         recoChip: {
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
           borderRadius: 999,
-          padding: "4px 10px",
-          fontSize: 10.5,
+          padding: "3px 8px",
+          fontSize: 9,
           cursor: "pointer",
           whiteSpace: "nowrap",
           maxWidth: "100%",
           overflow: "hidden",
           textOverflow: "ellipsis",
         },
-        weightInputRow: { display: "flex", gap: 6, alignItems: "center", marginBottom: 8 },
+        weightInputRow: { display: "flex", gap: 4, alignItems: "center", marginBottom: 6 },
         weightInput: {
           flex: 1,
           background: "#211e1b",
           border: "1px solid #322d29",
           color: "#e9e2d6",
-          borderRadius: 6,
-          padding: "6px 8px",
-          fontSize: 11.5,
+          borderRadius: 5,
+          padding: "4px 6px",
+          fontSize: 10,
           boxSizing: "border-box",
           width: "100%",
         },
         weightAddBtn: {
           background: "#c2542a",
           border: "none",
-          borderRadius: 6,
+          borderRadius: 5,
           color: "#1c1a18",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
           whiteSpace: "nowrap",
-          padding: "0 14px",
-          height: "34px",
-          fontSize: 11.5,
+          padding: "0 10px",
+          height: "28px",
+          fontSize: 10,
           fontWeight: 600,
         },
       };
@@ -547,12 +545,12 @@
         <div style={styles.app}>
           {/* Шапка */}
           <div style={styles.header}>
-            <div style={{ width: 28, height: 28, borderRadius: 7, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div style={{ width: 24, height: 24, borderRadius: 6, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
             </div>
             <div>
               <div style={styles.brand}>ЛОГОВО ЖИЗНИ</div>
-              <div style={styles.sub}>норма калорий · еда · вода за день</div>
+              <div style={styles.sub}>норма калорий · еда · вода</div>
             </div>
           </div>
 
@@ -561,8 +559,8 @@
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
-                <button style={{ ...styles.seg, ...(sex === "male" ? styles.segActive : {}) }} onClick={() => setSex("male")}>Мужской</button>
-                <button style={{ ...styles.seg, ...(sex === "female" ? styles.segActive : {}) }} onClick={() => setSex("female")}>Женский</button>
+                <button style={{ ...styles.seg, ...(sex === "male" ? styles.segActive : {}) }} onClick={() => setSex("male")}>М</button>
+                <button style={{ ...styles.seg, ...(sex === "female" ? styles.segActive : {}) }} onClick={() => setSex("female")}>Ж</button>
               </div>
 
               <div style={styles.fieldsRow}>
@@ -590,13 +588,12 @@
               </div>
 
               <div style={styles.rowLabel}>Активность</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
                 {ACTIVITY.map(a => (
                   <button key={a.key} onClick={() => setActivity(a.key)} style={{ ...styles.optRow, ...(activity === a.key ? styles.optRowActive : {}) }}>
                     <span style={styles.optDot(activity === a.key)} />
                     <span style={{ flex: 1, textAlign: "left" }}>
                       <div style={styles.optLabel}>{a.label}</div>
-                      <div style={styles.optHint}>{a.hint}</div>
                     </span>
                   </button>
                 ))}
@@ -615,19 +612,19 @@
             <div style={styles.card}>
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
-                  <svg viewBox="0 0 140 140" style={{ width: 110, height: 110 }}>
+                  <svg viewBox="0 0 140 140" style={{ width: 90, height: 90 }}>
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
                     <circle cx="70" cy="70" r="58" fill="none" stroke={over ? "#d9503f" : "#c2542a"} strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - ringPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
                     <text x="70" y="66" textAnchor="middle" style={styles.ringNumber}>{Math.round(eaten)}</text>
                     <text x="70" y="84" textAnchor="middle" style={styles.ringUnit}>ккал</text>
                   </svg>
                   <div style={{ ...styles.ringCaption, color: over ? "#d9503f" : "#c2542a" }}>
-                    {over ? `+${Math.abs(remaining)}` : `${remaining} ккал`}
+                    {over ? `+${Math.abs(remaining)}` : `${remaining}`}
                   </div>
                 </div>
 
                 <div style={styles.ringCol}>
-                  <svg viewBox="0 0 140 140" style={{ width: 110, height: 110 }}>
+                  <svg viewBox="0 0 140 140" style={{ width: 90, height: 90 }}>
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#2a2521" strokeWidth="11" />
                     <circle cx="70" cy="70" r="58" fill="none" stroke="#3fb7a6" strokeWidth="11" strokeLinecap="round" strokeDasharray={2 * Math.PI * 58} strokeDashoffset={2 * Math.PI * 58 * (1 - waterPct / 100)} transform="rotate(-90 70 70)" style={{ transition: "stroke-dashoffset 0.5s ease" }} />
                     <text x="70" y="66" textAnchor="middle" style={{ ...styles.ringNumber, fill: "#3fb7a6" }}>{(drunk / 1000).toFixed(1)}л</text>
@@ -642,11 +639,11 @@
               <div style={styles.statRow}>
                 <div style={styles.statBox}>
                   <div style={styles.statValue}>{Math.round(result.target)}</div>
-                  <div style={styles.statLabel}>Норма калорий</div>
+                  <div style={styles.statLabel}>Норма</div>
                 </div>
                 <div style={styles.statBox}>
                   <div style={styles.statValue}>{(result.waterTarget / 1000).toFixed(1)} л</div>
-                  <div style={styles.statLabel}>Норма воды</div>
+                  <div style={styles.statLabel}>Вода</div>
                 </div>
               </div>
 
@@ -655,26 +652,26 @@
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenProtein / result.protein) * 100)}%`, background: "#3fb7a6" }} /></div>
                   <div style={styles.macroValue}>{Math.round(eatenProtein)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.protein)}</span></div>
-                  <div style={styles.macroLabel}>Белки</div>
+                  <div style={styles.macroLabel}>Б</div>
                 </div>
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenFat / result.fat) * 100)}%`, background: "#c2542a" }} /></div>
                   <div style={styles.macroValue}>{Math.round(eatenFat)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.fat)}</span></div>
-                  <div style={styles.macroLabel}>Жиры</div>
+                  <div style={styles.macroLabel}>Ж</div>
                 </div>
                 <div style={styles.macroBox}>
                   <div style={styles.macroBarTrack}><div style={{ ...styles.macroBarFill, width: `${Math.min(100, (eatenCarbs / result.carbs) * 100)}%`, background: "#9a9188" }} /></div>
                   <div style={styles.macroValue}>{Math.round(eatenCarbs)} <span style={{ color: "#9a9188", fontWeight: 400 }}>/ {Math.round(result.carbs)}</span></div>
-                  <div style={styles.macroLabel}>Углеводы</div>
+                  <div style={styles.macroLabel}>У</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Рекомендации */}
-          <div style={{ ...styles.card, marginTop: 10 }}>
+          <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
-            <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 6 }}>{RECOMMENDATIONS[goal].note}</p>
+            <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 4 }}>{RECOMMENDATIONS[goal].note}</p>
             <div style={styles.recoChips}>
               {RECOMMENDATIONS[goal].items.map((item) => (
                 <button key={item} style={styles.recoChip} onClick={() => pickFromRecommendation(item)}>
@@ -685,7 +682,7 @@
           </div>
 
           {/* Методика управления весом */}
-          <div style={{ ...styles.card, marginTop: 10 }}>
+          <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>Методика управления весом</div>
             <div style={styles.weightInputRow}>
               <input
@@ -696,15 +693,15 @@
                 onChange={(e) => setWeightInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addWeightRecord()}
               />
-              <button style={styles.weightAddBtn} onClick={addWeightRecord}>+ Добавить</button>
+              <button style={styles.weightAddBtn} onClick={addWeightRecord}>+</button>
             </div>
             {!weightLoaded ? (
               <div style={styles.footnote}>Загружаю...</div>
             ) : !weightRecords.length ? (
-              <div style={styles.footnote}>Пока нет записей. Добавьте свой вес!</div>
+              <div style={styles.footnote}>Пока нет записей</div>
             ) : (
               <div style={styles.foodList}>
-                {weightRecords.map((record) => (
+                {weightRecords.slice(-5).reverse().map((record) => (
                   <div key={record.id} style={styles.foodRow}>
                     <span style={{ flex: 1 }}>📊 {record.date}</span>
                     <span style={styles.foodKcalTag}>{record.weight} кг</span>
@@ -716,12 +713,12 @@
           </div>
 
           {/* Дневник питания */}
-          <div style={{ ...styles.card, marginTop: 10 }}>
-            <div style={styles.rowLabel}>Дневник питания — сегодня</div>
+          <div style={{ ...styles.card, marginTop: 6 }}>
+            <div style={styles.rowLabel}>Дневник питания</div>
             <div style={{ position: "relative" }}>
               <input
                 style={styles.foodNameInput}
-                placeholder="начни вводить продукт"
+                placeholder="введи продукт"
                 value={foodName}
                 onChange={e => {
                   setFoodName(e.target.value);
@@ -746,7 +743,7 @@
                       }}
                     >
                       <span>{f.name}</span>
-                      <span style={styles.suggestMeta}>{f.kcal} ккал/100г</span>
+                      <span style={styles.suggestMeta}>{f.kcal}</span>
                     </button>
                   ))}
                 </div>
@@ -757,10 +754,10 @@
               <div style={styles.dbRow}>
                 <div style={styles.miniField}>
                   <input type="number" value={grams} onChange={e => setGrams(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
-                  <span style={styles.miniFieldLabel}>граммы</span>
+                  <span style={styles.miniFieldLabel}>г</span>
                 </div>
                 <div style={styles.dbPreview}>
-                  {computedFromDb && <span style={{ color: "#c2542a", fontWeight: 700 }}>{computedFromDb.kcal} ккал <span style={{ color: "#9a9188", fontWeight: 400 }}>Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}</span></span>}
+                  {computedFromDb && <span style={{ color: "#c2542a", fontWeight: 700 }}>{computedFromDb.kcal} <span style={{ color: "#9a9188", fontWeight: 400 }}>Б{computedFromDb.protein}/Ж{computedFromDb.fat}/У{computedFromDb.carbs}</span></span>}
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
@@ -772,15 +769,15 @@
                 </div>
                 <div style={styles.miniField}>
                   <input type="number" placeholder="0" value={foodProtein} onChange={e => setFoodProtein(e.target.value)} style={{ ...styles.miniFieldInput, color: "#3fb7a6" }} />
-                  <span style={styles.miniFieldLabel}>белки</span>
+                  <span style={styles.miniFieldLabel}>Б</span>
                 </div>
                 <div style={styles.miniField}>
                   <input type="number" placeholder="0" value={foodFat} onChange={e => setFoodFat(e.target.value)} style={{ ...styles.miniFieldInput, color: "#c2542a" }} />
-                  <span style={styles.miniFieldLabel}>жиры</span>
+                  <span style={styles.miniFieldLabel}>Ж</span>
                 </div>
                 <div style={styles.miniField}>
                   <input type="number" placeholder="0" value={foodCarbs} onChange={e => setFoodCarbs(e.target.value)} style={{ ...styles.miniFieldInput, color: "#9a9188" }} />
-                  <span style={styles.miniFieldLabel}>углеводы</span>
+                  <span style={styles.miniFieldLabel}>У</span>
                 </div>
                 <button style={styles.addFoodBtn} onClick={addFood}><Plus /></button>
               </div>
@@ -789,13 +786,13 @@
             {!logLoaded ? (
               <div style={styles.footnote}>Загружаю...</div>
             ) : !log.length ? (
-              <div style={styles.footnote}>Пока пусто</div>
+              <div style={styles.footnote}>Пусто</div>
             ) : (
               <div style={styles.foodList}>
-                {log.map(f => (
+                {log.slice(-5).reverse().map(f => (
                   <div key={f.id} style={styles.foodRow}>
                     <span style={{ flex: 1 }}>{f.name}</span>
-                    <span style={styles.foodKcalTag}>{f.kcal} ккал</span>
+                    <span style={styles.foodKcalTag}>{f.kcal}</span>
                     <button style={styles.ghostDelete} onClick={() => removeFood(f.id)}><Trash2 /></button>
                   </div>
                 ))}
@@ -804,11 +801,11 @@
           </div>
 
           {/* Вода */}
-          <div style={{ ...styles.card, marginTop: 10 }}>
-            <div style={styles.rowLabel}><Droplet /> Вода — сегодня</div>
+          <div style={{ ...styles.card, marginTop: 6 }}>
+            <div style={styles.rowLabel}><Droplet /> Вода</div>
             <div style={styles.waterQuickRow}>
               {WATER_QUICK.map(q => (
-                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>+ {q.label}</button>
+                <button key={q.label} style={styles.waterQuickBtn} onClick={() => addWater(q.ml)}>+{q.label}</button>
               ))}
             </div>
             <div style={styles.foodInputRow}>
@@ -818,12 +815,12 @@
             {!waterLoaded ? (
               <div style={styles.footnote}>Загружаю…</div>
             ) : !water.length ? (
-              <div style={styles.footnote}>Пока пусто</div>
+              <div style={styles.footnote}>Пусто</div>
             ) : (
               <div style={styles.foodList}>
-                {water.map(w => (
+                {water.slice(-5).reverse().map(w => (
                   <div key={w.id} style={styles.foodRow}>
-                    <span style={{ flex: 1 }}>💧 вода</span>
+                    <span style={{ flex: 1 }}>💧</span>
                     <span style={styles.foodKcalTag}>{w.ml} мл</span>
                     <button style={styles.ghostDelete} onClick={() => removeWater(w.id)}><Trash2 /></button>
                   </div>
