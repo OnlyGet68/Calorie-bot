@@ -93,18 +93,18 @@
     // ДАННЫЕ
     // =============================================================
     const ACTIVITY = [
-      { key: "sedentary", label: "Минимум активности", mult: 1.2 },
-      { key: "light", label: "Лёгкая активность", mult: 1.375 },
-      { key: "moderate", label: "Средняя активность", mult: 1.55 },
-      { key: "high", label: "Высокая активность", mult: 1.725 },
-      { key: "extreme", label: "Макс. активность + физ. нагрузки ", mult: 1.9 },
+      { key: "sedentary", label: "Минимум", mult: 1.2 },
+      { key: "light", label: "Лёгкая", mult: 1.375 },
+      { key: "moderate", label: "Средняя", mult: 1.55 },
+      { key: "high", label: "Высокая", mult: 1.725 },
+      { key: "extreme", label: "Макс.", mult: 1.9 },
     ];
 
     const GOALS = [
       { key: "dry", label: "Сушка", delta: -0.25 },
-      { key: "lose", label: "Снижение веса", delta: -0.2 },
-      { key: "maintain", label: "Удержание веса", delta: 0 },
-      { key: "gain", label: "Набор массы", delta: 0.12 },
+      { key: "lose", label: "Снижение", delta: -0.2 },
+      { key: "maintain", label: "Удержание", delta: 0 },
+      { key: "gain", label: "Набор", delta: 0.12 },
     ];
 
     const RECOMMENDATIONS = {
@@ -157,12 +157,12 @@
     ];
 
     const uid = () => Math.random().toString(36).slice(2, 10);
-    const dateStr = () => {
+    const today = () => {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     };
-    const foodKeyToday = () => `foodlog:${dateStr()}`;
-    const waterKeyToday = () => `waterlog:${dateStr()}`;
+    const foodKeyToday = () => `foodlog:${today()}`;
+    const waterKeyToday = () => `waterlog:${today()}`;
     const weightKey = "weight_log";
 
     // =============================================================
@@ -365,6 +365,7 @@
       const waterRemaining = Math.max(0, Math.round(result.waterTarget - drunk));
       const waterPct = Math.min(100, (drunk / (result.waterTarget || 1)) * 100);
       const waterDone = drunk >= result.waterTarget;
+      const caloriesDone = eaten >= result.target;
 
       // =============================================================
       // ГРАФИК ВЕСА
@@ -591,6 +592,27 @@
           fontSize: 10,
           fontWeight: 600,
         },
+        statusRow: {
+          display: "flex",
+          gap: 6,
+          marginBottom: 6,
+        },
+        statusBox: {
+          flex: 1,
+          background: "#211e1b",
+          border: "1px solid #322d29",
+          borderRadius: 5,
+          padding: "4px 6px",
+          textAlign: "center",
+        },
+        statusLabel: {
+          fontSize: 7.5,
+          color: "#9a9188",
+        },
+        statusValue: {
+          fontSize: 11,
+          fontWeight: 700,
+        },
       };
 
       // =============================================================
@@ -611,7 +633,6 @@
 
           {/* Основная сетка */}
           <div style={styles.grid}>
-            {/* Левая колонка */}
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
               <div style={styles.segRow}>
@@ -665,8 +686,23 @@
               </div>
             </div>
 
-            {/* Правая колонка */}
             <div style={styles.card}>
+              {/* СТАТУС ВЫПОЛНЕНИЯ НОРМЫ */}
+              <div style={styles.statusRow}>
+                <div style={styles.statusBox}>
+                  <div style={styles.statusLabel}>🔥 Калории</div>
+                  <div style={{ ...styles.statusValue, color: caloriesDone ? "#3fb7a6" : "#c2542a" }}>
+                    {caloriesDone ? "✅ Выполнена" : "❌ Не выполнена"}
+                  </div>
+                </div>
+                <div style={styles.statusBox}>
+                  <div style={styles.statusLabel}>💧 Вода</div>
+                  <div style={{ ...styles.statusValue, color: waterDone ? "#3fb7a6" : "#c2542a" }}>
+                    {waterDone ? "✅ Выполнена" : "❌ Не выполнена"}
+                  </div>
+                </div>
+              </div>
+
               <div style={styles.ringsRow}>
                 <div style={styles.ringCol}>
                   <svg viewBox="0 0 140 140" style={{ width: 90, height: 90 }}>
@@ -831,7 +867,7 @@
           </div>
 
           {/* =============================================================
-              БЛОК 3: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ (С ГРАФИКОМ)
+              БЛОК 3: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ
               ============================================================= */}
           <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>Методика управления весом</div>
@@ -861,7 +897,6 @@
                     </div>
                   ))}
                 </div>
-                {/* ГРАФИК ВЕСА */}
                 <WeightChart records={weightRecords} />
               </>
             )}
