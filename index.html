@@ -164,6 +164,7 @@
     const foodKeyToday = () => `foodlog:${today()}`;
     const waterKeyToday = () => `waterlog:${today()}`;
     const weightKey = "weight_log";
+    const settingsKey = "user_settings"; // КЛЮЧ ДЛЯ НАСТРОЕК
 
     // =============================================================
     // ГЛАВНЫЙ КОМПОНЕНТ
@@ -171,6 +172,7 @@
     function CalorieCalc() {
       useTelegramWebApp();
 
+      // НАСТРОЙКИ (сохраняются)
       const [sex, setSex] = useState("male");
       const [age, setAge] = useState(28);
       const [weight, setWeight] = useState(80);
@@ -200,18 +202,37 @@
       const foodKey = foodKeyToday();
       const waterKey = waterKeyToday();
 
+      // =============================================================
+      // ЗАГРУЗКА ДАННЫХ + НАСТРОЕК
+      // =============================================================
       useEffect(() => {
         (async () => {
+          try {
+            // 1. Загружаем настройки пользователя
+            const r = await window.storage.get(settingsKey, false);
+            if (r) {
+              const settings = JSON.parse(r.value);
+              if (settings.age) setAge(settings.age);
+              if (settings.weight) setWeight(settings.weight);
+              if (settings.height) setHeight(settings.height);
+              if (settings.sex) setSex(settings.sex);
+              if (settings.activity) setActivity(settings.activity);
+              if (settings.goal) setGoal(settings.goal);
+            }
+          } catch {}
+
           try {
             const r = await window.storage.get(foodKey, false);
             setLog(r ? JSON.parse(r.value) : []);
           } catch { setLog([]); }
           setLogLoaded(true);
+
           try {
             const r2 = await window.storage.get(waterKey, false);
             setWater(r2 ? JSON.parse(r2.value) : []);
           } catch { setWater([]); }
           setWaterLoaded(true);
+
           try {
             const r3 = await window.storage.get(weightKey, false);
             setWeightRecords(r3 ? JSON.parse(r3.value) : []);
@@ -220,6 +241,21 @@
         })();
       }, []);
 
+      // =============================================================
+      // СОХРАНЕНИЕ НАСТРОЕК ПРИ ИЗМЕНЕНИИ
+      // =============================================================
+      const saveSettings = useCallback(() => {
+        const settings = { age, weight, height, sex, activity, goal };
+        window.storage.set(settingsKey, JSON.stringify(settings), false);
+      }, [age, weight, height, sex, activity, goal]);
+
+      useEffect(() => {
+        saveSettings();
+      }, [age, weight, height, sex, activity, goal, saveSettings]);
+
+      // =============================================================
+      // ОСТАЛЬНЫЕ ФУНКЦИИ
+      // =============================================================
       const persistLog = useCallback(async (next) => {
         try { await window.storage.set(foodKey, JSON.stringify(next), false); } catch {}
       }, [foodKey]);
@@ -620,7 +656,6 @@
       // =============================================================
       return (
         <div style={styles.app}>
-          {/* Шапка */}
           <div style={styles.header}>
             <div style={{ width: 24, height: 24, borderRadius: 6, background: "#c2542a", color: "#1c1a18", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Flame />
@@ -631,7 +666,6 @@
             </div>
           </div>
 
-          {/* Основная сетка */}
           <div style={styles.grid}>
             <div style={styles.card}>
               <div style={styles.rowLabel}>Пол</div>
@@ -687,7 +721,6 @@
             </div>
 
             <div style={styles.card}>
-              {/* СТАТУС ВЫПОЛНЕНИЯ НОРМЫ */}
               <div style={styles.statusRow}>
                 <div style={styles.statusBox}>
                   <div style={styles.statusLabel}>🔥 Калории</div>
@@ -761,9 +794,7 @@
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК 1: РЕКОМЕНДАЦИИ
-              ============================================================= */}
+          {/* БЛОК 1: РЕКОМЕНДАЦИИ */}
           <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>{RECOMMENDATIONS[goal].title}</div>
             <p style={{ ...styles.footnote, marginTop: 0, marginBottom: 4 }}>{RECOMMENDATIONS[goal].note}</p>
@@ -776,9 +807,7 @@
             </div>
           </div>
 
-          {/* =============================================================
-              БЛОК 2: ДНЕВНИК ПИТАНИЯ
-              ============================================================= */}
+          {/* БЛОК 2: ДНЕВНИК ПИТАНИЯ */}
           <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>Дневник питания</div>
             <div style={{ position: "relative" }}>
@@ -866,9 +895,7 @@
             )}
           </div>
 
-          {/* =============================================================
-              БЛОК 3: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ
-              ============================================================= */}
+          {/* БЛОК 3: МЕТОДИКА УПРАВЛЕНИЯ ВЕСОМ */}
           <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}>Методика управления весом</div>
             <div style={styles.weightInputRow}>
@@ -902,9 +929,7 @@
             )}
           </div>
 
-          {/* =============================================================
-              БЛОК 4: ВОДА
-              ============================================================= */}
+          {/* БЛОК 4: ВОДА */}
           <div style={{ ...styles.card, marginTop: 6 }}>
             <div style={styles.rowLabel}><Droplet /> Вода</div>
             <div style={styles.waterQuickRow}>
